@@ -22,11 +22,21 @@ const credentials = {
   secretAccessKey: env.MINIO_SECRET_KEY,
 };
 
+// AWS SDK v3 (≥3.729) adds an automatic CRC32 integrity checksum to PutObject by default. For a
+// PRESIGNED PUT that breaks uploads: the presigner signs `x-amz-checksum-crc32` for an empty body, but
+// the browser sends the real bytes — MinIO then 403s on the checksum mismatch. `WHEN_REQUIRED` reverts
+// to the pre-3.729 behaviour (no checksum unless the operation needs one), which MinIO expects.
+const checksumOpts = {
+  requestChecksumCalculation: "WHEN_REQUIRED",
+  responseChecksumValidation: "WHEN_REQUIRED",
+} as const;
+
 const s3Public = new S3Client({
   endpoint: env.MINIO_ENDPOINT,
   region: "us-east-1",
   forcePathStyle: true, // required for MinIO
   credentials,
+  ...checksumOpts,
 });
 
 const s3Internal = new S3Client({
@@ -34,6 +44,7 @@ const s3Internal = new S3Client({
   region: "us-east-1",
   forcePathStyle: true,
   credentials,
+  ...checksumOpts,
 });
 
 const BUCKET = env.MINIO_BUCKET;
