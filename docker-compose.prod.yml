@@ -1,0 +1,135 @@
+# Production stack (single Ubuntu host). nginx is the ONLY public service (80/443) and reverse-proxies:
+#   <domain>      → app          (Next standalone server)
+#   cdn.<domain>  → imgproxy      (signed image transforms; reads MinIO internally)
+#   s3.<domain>   → minio         (browser presigned uploads only)
+# Everything else stays on the internal network. Config comes from .env.production (see the example).
+#
+#   docker compose --env-file .env.production -f docker-compose.prod.yml up -d
+#
+# (suggested alias on the server:  alias dcp='docker compose --env-file .env.production -f docker-compose.prod.yml')
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env.production
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    env_file: .env.production
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: ensure the bucket exists (private — imgproxy reads it with credentials), then exits.
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    env_file: .env.production
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/$$MINIO_BUCKET &&
+      echo 'bucket ready';
+      "
+
+  imgproxy:
+    image: darthsim/imgproxy:latest
+    restart: unless-stopped
+    depends_on:
+      - minio
+    environment:
+      IMGPROXY_KEY: ${IMGPROXY_KEY}
+      IMGPROXY_SALT: ${IMGPROXY_SALT}
+      IMGPROXY_USE_S3: "true"
+      IMGPROXY_S3_ENDPOINT: "http://minio:9000"
+      AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY}
+      IMGPROXY_S3_REGION: us-east-1
+      IMGPROXY_ALLOWED_SOURCES: "s3://"
+      IMGPROXY_ENABLE_WEBP_DETECTION: "true"
+      IMGPROXY_ENABLE_AVIF_DETECTION: "true"
+
+  # One-shot: apply pending Prisma migrations, then exit. The app waits for this to succeed.
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: pnpm prisma migrate deploy
+    env_file: .env.production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    restart: unless-stopped
+    env_file: .env.production
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      createbuckets:
+        condition: service_completed_successfully
+      migrate:
+        condition: service_completed_successfully
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+      - imgproxy
+      - minio
+    environment:
+      DOMAIN: ${DOMAIN}
+      CDN_HOST: ${CDN_HOST}
+      S3_HOST: ${S3_HOST}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/certbot/conf:/etc/letsencrypt:ro
+      - ./nginx/certbot/www:/var/www/certbot:ro
+    # Reload every 6h so renewed certificates are picked up without a restart. The final `exec` re-enters
+    # the official entrypoint with `nginx …` so its envsubst step still renders the templates.
+    command: >
+      /bin/sh -c "while :; do sleep 6h & wait $${!}; nginx -s reload; done & exec /docker-entrypoint.sh nginx -g 'daemon off;'"
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    volumes:
+      - ./nginx/certbot/conf:/etc/letsencrypt
+      - ./nginx/certbot/www:/var/www/certbot
+    # Attempt renewal twice a day (no-op until ~30 days before expiry).
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done;"
+
+volumes:
+  postgres-data:
+  minio-data:

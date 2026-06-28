@@ -1,0 +1,47 @@
+/* Menu design tokens — shared primitives + the three templates' default token sets.
+   Two axes:
+     1) TEMPLATE = layout/browse-model (Warm | Scandi | Editorial) — a discrete React component.
+     2) TOKENS   = palette/type/radius/density via CSS variables — set defaults here per template,
+                   then ThemeScope overrides specific vars from Cafe.themeTokens at render time.
+
+   Apply on a wrapper: <div data-template="editorial" style="--accent:#...">  (overrides win).
+   The customer menu is RTL Persian: document dir="rtl" lang="fa"; use logical properties everywhere.
+   The carousel TRACK is the one intentional dir="ltr" island so translateX math stays correct. */
+
+/* ---- variables every template understands (names are the stable contract) ---- */
+:root {
+  --bg: #0E0C0B; --ink: #F3ECDF; --soft: #A89C8B; --accent: #C9A24B;
+  --panel: #171311; --line: rgba(243,236,223,.14); --radius: 18px;
+}
+
+/* ---- WARM (Étude 1): oat paper, roasted ink, honey + olive; rounded, tactile ---- */
+[data-template="warm"] {
+  --bg: #F3EBDC; --ink: #2A1E15; --soft: #6B5A48; --accent: #B9752A;
+  --accent-2: #6E7A4E; --panel: #FBF6EC; --line: #E0D2B8; --radius: 24px;
+}
+
+/* ---- SCANDI (Étude 2): white, near-black ink, single muted sage; airy, precise ---- */
+[data-template="scandi"] {
+  --bg: #FFFFFF; --ink: #14130F; --soft: #8A877E; --accent: #7C8B72;
+  --panel: #F6F5F3; --line: #ECEAE5; --radius: 14px;
+}
+
+/* ---- EDITORIAL (Étude 3): near-black, warm off-white, gold hairline; cinematic full-bleed ---- */
+[data-template="editorial"] {
+  --bg: #0E0C0B; --ink: #F3ECDF; --soft: #A89C8B; --accent: #C9A24B;
+  --panel: #171311; --line: rgba(243,236,223,.14); --radius: 18px;
+}
+
+/* ---- shared carousel + fullscreen primitives (used by ALL templates' detail view) ---- */
+.car { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--panel); touch-action: pan-y; }
+.car .track { display: flex; height: 100%; will-change: transform; }   /* dir="ltr" island */
+.car .slide { flex: 0 0 100%; height: 100%; position: relative; }
+.car .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.dots { position: absolute; inset-block-end: 14px; inset-inline: 0; display: flex; gap: 6px; justify-content: center; z-index: 3; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.5); transition: .2s; }
+.dot[data-on="true"] { width: 20px; border-radius: 4px; background: var(--accent); }
+
+.fs { position: fixed; inset: 0; z-index: 130; background: #000; }
+.fs .slide img { object-fit: contain; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>منوی کافه — اتود ۱ (گرم و دنج)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===== Étude 1 — Warm & Cozy / hand-crafted =====
+     palette: oat paper, roasted ink, honey-caramel accent, olive tag, milk */
+  :root{
+    --paper:#F3EBDC; --paper-2:#EDE2CF; --ink:#2A1E15; --ink-soft:#6B5A48;
+    --honey:#B9752A; --honey-deep:#9C5E1E; --olive:#6E7A4E; --milk:#FBF6EC;
+    --line:#E0D2B8; --shadow:rgba(58,40,22,.16);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Vazirmatn",Tahoma,system-ui,sans-serif;
+    background:var(--paper); color:var(--ink);
+    -webkit-font-smoothing:antialiased; overscroll-behavior-y:none;
+  }
+  /* paper grain */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:radial-gradient(rgba(120,90,50,.06) 1px, transparent 1px);
+    background-size:4px 4px; mix-blend-mode:multiply;
+  }
+  .wrap{max-width:520px; margin:0 auto; position:relative; z-index:1}
+
+  /* ---- header ---- */
+  header{padding:26px 20px 8px}
+  .kicker{font-size:12px; letter-spacing:.18em; color:var(--honey-deep); font-weight:600}
+  .logo{font-size:34px; font-weight:800; line-height:1.1; margin:6px 0 2px; letter-spacing:-.01em}
+  .tag{font-size:13px; color:var(--ink-soft)}
+  .rule{height:2px; width:46px; background:var(--honey); border-radius:2px; margin:14px 0 0}
+
+  /* ---- sticky category pills ---- */
+  .nav{position:sticky; top:0; z-index:30; background:var(--paper);
+       padding:12px 14px 12px; box-shadow:0 8px 18px -16px var(--shadow)}
+  .nav::after{content:""; position:absolute; inset-inline:0; bottom:0; height:1px; background:var(--line)}
+  .pills{display:flex; gap:8px; overflow-x:auto; scrollbar-width:none}
+  .pills::-webkit-scrollbar{display:none}
+  .pill{flex:0 0 auto; border:1.5px solid var(--line); background:var(--milk);
+        color:var(--ink-soft); padding:9px 16px; border-radius:100px; font-size:14px;
+        font-weight:600; white-space:nowrap; cursor:pointer; transition:.18s}
+  .pill[aria-current="true"]{background:var(--ink); color:var(--milk); border-color:var(--ink)}
+
+  /* ---- sections / cards ---- */
+  main{padding:8px 16px 90px}
+  .sec{padding-top:18px; scroll-margin-top:64px}
+  .sec h2{font-size:21px; font-weight:800; margin:0 0 2px}
+  .sec .count{font-size:12px; color:var(--ink-soft); margin-bottom:12px}
+  .card{background:var(--milk); border:1px solid var(--line); border-radius:24px;
+        overflow:hidden; margin-bottom:16px; box-shadow:0 18px 34px -28px var(--shadow);
+        cursor:pointer; transition:transform .15s ease}
+  .card:active{transform:scale(.985)}
+  .thumb{position:relative; width:100%; aspect-ratio:16/11; overflow:hidden}
+  .thumb img{width:100%; height:100%; object-fit:cover; display:block}
+  .kcal{position:absolute; inset-block-start:10px; inset-inline-end:10px;
+        background:rgba(251,246,236,.92); color:var(--ink); font-size:12px; font-weight:700;
+        padding:5px 10px; border-radius:100px; box-shadow:0 4px 10px -4px var(--shadow)}
+  .cbody{padding:13px 16px 16px}
+  .cbody h3{margin:0 0 4px; font-size:18px; font-weight:700}
+  .cbody p{margin:0; font-size:13px; color:var(--ink-soft); line-height:1.7;
+           display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden}
+  .more{margin-top:9px; font-size:12.5px; font-weight:700; color:var(--honey-deep)}
+
+  /* ---- detail sheet ---- */
+  .sheet-bg{position:fixed; inset:0; background:rgba(30,20,12,.5); z-index:80;
+            opacity:0; pointer-events:none; transition:.25s}
+  .sheet-bg.on{opacity:1; pointer-events:auto}
+  .sheet{position:fixed; inset-inline:0; bottom:0; z-index:90; max-width:520px; margin:0 auto;
+         background:var(--paper); border-radius:26px 26px 0 0; transform:translateY(101%);
+         transition:transform .3s cubic-bezier(.22,1,.36,1); max-height:92vh; overflow:auto;
+         box-shadow:0 -18px 50px -20px rgba(30,20,12,.5)}
+  .sheet.on{transform:translateY(0)}
+  .grip{width:42px; height:5px; background:var(--line); border-radius:9px; margin:10px auto 4px}
+  .sheet-pad{padding:6px 20px 30px}
+  .sheet h2{font-size:25px; font-weight:800; margin:10px 0 2px}
+  .badges{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 18px}
+  .badge{font-size:12.5px; font-weight:700; padding:6px 12px; border-radius:100px}
+  .badge.k{background:#F1E6D2; color:var(--honey-deep)}
+  .badge.o{background:#E9EDDC; color:var(--olive)}
+  .block-t{font-size:13px; font-weight:700; color:var(--ink-soft); margin:0 0 9px; letter-spacing:.02em}
+  .ings{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 6px; padding:0; list-style:none}
+  .ings li{background:var(--milk); border:1px solid var(--line); border-radius:12px;
+           padding:8px 13px; font-size:14px}
+  .close{position:sticky; top:0; float:inline-start; margin:6px; background:var(--milk);
+         border:1px solid var(--line); width:38px; height:38px; border-radius:50%; font-size:18px;
+         cursor:pointer; color:var(--ink); line-height:1}
+
+  /* ---- carousel (shared) ---- */
+  .car{position:relative; border-radius:20px; overflow:hidden; background:var(--paper-2);
+       aspect-ratio:4/3; touch-action:pan-y}
+  .track{display:flex; height:100%; will-change:transform}
+  .slide{flex:0 0 100%; height:100%; position:relative}
+  .slide img{width:100%; height:100%; object-fit:cover; display:block}
+  .slide-fallback{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+                  color:#fff; font-weight:700; font-size:15px; text-shadow:0 1px 6px rgba(0,0,0,.4)}
+  .dots{position:absolute; inset-block-end:12px; inset-inline:0; display:flex; gap:6px;
+        justify-content:center; z-index:3}
+  .dot{width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.55);
+       transition:.2s; box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .dot.on{width:20px; border-radius:5px; background:#fff}
+  .fs-btn{position:absolute; inset-block-start:10px; inset-inline-start:10px; z-index:3;
+          background:rgba(251,246,236,.92); border:none; width:36px; height:36px; border-radius:50%;
+          cursor:pointer; font-size:16px; box-shadow:0 4px 10px -4px var(--shadow)}
+
+  /* ---- fullscreen viewer (shared) ---- */
+  .fs{position:fixed; inset:0; z-index:120; background:#0c0907; display:none}
+  .fs.on{display:block}
+  .fs .track{height:100%}
+  .fs .slide{display:flex; align-items:center; justify-content:center}
+  .fs .slide img{width:100%; height:100%; object-fit:contain}
+  .fs-close{position:absolute; inset-block-start:14px; inset-inline-start:14px; z-index:5;
+            background:rgba(255,255,255,.14); color:#fff; border:none; width:42px; height:42px;
+            border-radius:50%; font-size:20px; cursor:pointer; backdrop-filter:blur(4px)}
+  .fs-count{position:absolute; inset-block-start:20px; inset-inline-end:18px; z-index:5; color:#fff;
+            font-size:14px; font-weight:600; opacity:.85}
+  .fs .dots{inset-block-end:22px}
+
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">دست‌ساز · هر روز تازه</div>
+    <div class="logo">کافه‌خانه</div>
+    <div class="tag">قهوهٔ تخصصی و شیرینی خانگی</div>
+    <div class="rule"></div>
+  </header>
+
+  <nav class="nav"><div class="pills" id="pills"></div></nav>
+  <main id="main"></main>
+</div>
+
+<!-- detail sheet -->
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet">
+  <button class="close" id="sheetClose" aria-label="بستن">✕</button>
+  <div class="grip"></div>
+  <div class="sheet-pad" id="sheetBody"></div>
+</div>
+
+<!-- fullscreen viewer -->
+<div class="fs" id="fs">
+  <button class="fs-close" id="fsClose" aria-label="بستن">✕</button>
+  <div class="fs-count" id="fsCount"></div>
+  <div class="track" id="fsTrack"></div>
+  <div class="dots" id="fsDots"></div>
+</div>
+
+<script>
+/* ---------------- data ---------------- */
+const fa = n => String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+// real, verified Unsplash photo IDs keyed by each item's base seed
+const IMG = {
+  11:['1568713852733-56590b197f4f','1509042239860-f550ce710b93','1511920170033-f8396924c348'],   // espresso
+  21:['1559496417-e7f25cb247f3','1509042239860-f550ce710b93','1568713852733-56590b197f4f'],       // americano
+  31:['1512568400610-62da28bc8a13','1541167760496-1628856ab772','1556742526-795a8eac090e'],       // cappuccino
+  41:['1553962311-62f2471b159d','1556742526-795a8eac090e','1511920170033-f8396924c348'],          // latte
+  51:['1577805947697-89e18249d767','1509042239860-f550ce710b93','1602351447937-745cb720612f'],    // mocha
+  61:['1461023058943-07fcbe16d735','1549652127-2e5e59e86a7a','1533007716222-4b465613a984'],       // iced latte
+  71:['1517701550927-30cf4ba1dba5','1549652127-2e5e59e86a7a','1447933601403-0c6688de566e'],       // cold brew
+  81:['1592663527359-cf6642f54cff','1533007716222-4b465613a984','1568713852733-56590b197f4f'],    // affogato
+  91:['1717603545758-88cc454db69b','1704079698754-5e621edb610b','1495474472287-4d71bcdd2085'],    // matcha
+  101:['1506619216599-9d16d0903dfd','1610632380989-680fe40816c6','1495474472287-4d71bcdd2085'],   // black tea
+  111:['1610632380989-680fe40816c6','1506619216599-9d16d0903dfd','1447933601403-0c6688de566e'],   // masala chai
+  121:['1572490122747-3968b75cc699','1553787499-6f9133860278','1577805947697-89e18249d767'],      // choco shake
+  131:['1583024012457-b6de05b7003a','1553787499-6f9133860278','1621303837174-89787a7d4729'],      // strawberry smoothie
+  141:['1623334044303-241021148842','1556742526-795a8eac090e','1495474472287-4d71bcdd2085'],      // croissant
+  151:['1588195538326-c5b1e9f80a1b','1621303837174-89787a7d4729','1563729784474-d77dbb933a9e'],   // cheesecake
+  161:['1602351447937-745cb720612f','1563729784474-d77dbb933a9e','1577805947697-89e18249d767'],   // brownie
+};
+const U = (id,w) => `https://images.unsplash.com/photo-${id}?w=${w||900}&q=70&auto=format&fit=crop`;
+const img = (tags, base) => (IMG[base]||[]).map(id => U(id));
+
+const MENU = [
+  { id:'hot', name:'قهوهٔ گرم', items:[
+    {id:'espresso', name:'اسپرسو', kcal:5,  color:'#3b2415', ing:['دانهٔ آرابیکا','آب'], imgs:img('espresso,coffee',11)},
+    {id:'americano',name:'آمریکانو', kcal:10, color:'#4a2e1c', ing:['شات اسپرسو','آب داغ'], imgs:img('americano,coffee',21)},
+    {id:'cappuccino',name:'کاپوچینو', kcal:120,color:'#8a5a36', ing:['اسپرسو','شیر بخارپز','فوم شیر'], imgs:img('cappuccino,coffee',31)},
+    {id:'latte', name:'لاته', kcal:150, color:'#b07d4f', ing:['اسپرسو','شیر بخارپز','کمی فوم'], imgs:img('latte,coffee',41)},
+    {id:'mocha', name:'موکا', kcal:290, color:'#5a3722', ing:['اسپرسو','شیر','سس شکلات','خامه'], imgs:img('mocha,chocolate,coffee',51)},
+  ]},
+  { id:'cold', name:'قهوهٔ سرد', items:[
+    {id:'icelatte', name:'آیس‌لاته', kcal:130, color:'#c89a6a', ing:['اسپرسو','شیر سرد','یخ'], imgs:img('iced,latte,coffee',61)},
+    {id:'coldbrew', name:'کلد برو', kcal:15, color:'#2f1d12', ing:['قهوهٔ دم‌سرد ۱۸ ساعته','آب','یخ'], imgs:img('coldbrew,coffee',71)},
+    {id:'affogato', name:'آفوگاتو', kcal:240, color:'#6b4429', ing:['بستنی وانیل','شات اسپرسو'], imgs:img('affogato,icecream,coffee',81)},
+  ]},
+  { id:'tea', name:'دمنوش و چای', items:[
+    {id:'matcha', name:'ماچا لاته', kcal:140, color:'#6f8f4e', ing:['پودر ماچا','شیر بخارپز','کمی شکر'], imgs:img('matcha,latte',91)},
+    {id:'blacktea',name:'چای سیاه', kcal:2, color:'#7a4a2b', ing:['چای سیاه دم‌کشیده','آب'], imgs:img('blacktea,tea',101)},
+    {id:'masala', name:'چای ماسالا', kcal:160, color:'#9c6b3f', ing:['چای سیاه','شیر','هل','دارچین','زنجبیل'], imgs:img('chai,tea,spice',111)},
+  ]},
+  { id:'shake', name:'شیک و اسموتی', items:[
+    {id:'chocoshake', name:'شیک شکلات', kcal:420, color:'#4e2f1d', ing:['شیر','بستنی شکلاتی','سس شکلات'], imgs:img('chocolate,milkshake',121)},
+    {id:'strawsmoothie', name:'اسموتی توت‌فرنگی', kcal:180, color:'#c2596b', ing:['توت‌فرنگی تازه','ماست','عسل'], imgs:img('strawberry,smoothie',131)},
+  ]},
+  { id:'bakery', name:'کیک و دسر', items:[
+    {id:'croissant', name:'کروسان کره‌ای', kcal:270, color:'#caa15e', ing:['آرد','کرهٔ تازه','مخمر','نمک'], imgs:img('croissant,bakery',141)},
+    {id:'cheesecake', name:'چیزکیک', kcal:350, color:'#e4cf9e', ing:['پنیر خامه‌ای','بیسکویت','خامه'], imgs:img('cheesecake,dessert',151)},
+    {id:'brownie', name:'براونی', kcal:330, color:'#3d2417', ing:['شکلات تلخ','کره','تخم‌مرغ','آرد'], imgs:img('brownie,chocolate',161)},
+  ]},
+];
+
+/* ---------------- gradient fallback ---------------- */
+function tint(hex){return `linear-gradient(140deg, ${hex} 0%, ${shade(hex,-22)} 100%)`}
+function shade(hex,p){let n=parseInt(hex.slice(1),16),r=(n>>16)+p,g=(n>>8&255)+p,b=(n&255)+p;
+  const c=v=>Math.max(0,Math.min(255,v));return '#'+(c(r)<<16|c(g)<<8|c(b)).toString(16).padStart(6,'0')}
+
+/* ---------------- render list ---------------- */
+const pillsEl=document.getElementById('pills'), mainEl=document.getElementById('main');
+MENU.forEach((cat,ci)=>{
+  const pill=document.createElement('button');
+  pill.className='pill'; pill.textContent=cat.name;
+  if(ci===0) pill.setAttribute('aria-current','true');
+  pill.onclick=()=>document.getElementById('sec-'+cat.id).scrollIntoView({behavior:'smooth'});
+  pillsEl.appendChild(pill);
+
+  const sec=document.createElement('section');
+  sec.className='sec'; sec.id='sec-'+cat.id;
+  sec.innerHTML=`<h2>${cat.name}</h2><div class="count">${fa(cat.items.length)} مورد</div>`;
+  cat.items.forEach(it=>{
+    const card=document.createElement('article');
+    card.className='card';
+    card.innerHTML=`
+      <div class="thumb" style="background:${tint(it.color)}">
+        <img src="${it.imgs[0]}" alt="${it.name}" loading="lazy"
+             onerror="this.style.display='none'">
+        <span class="kcal">${fa(it.kcal)} کالری</span>
+      </div>
+      <div class="cbody">
+        <h3>${it.name}</h3>
+        <p>${it.ing.join(' • ')}</p>
+        <div class="more">مشاهدهٔ جزئیات و تصاویر ←</div>
+      </div>`;
+    card.onclick=()=>openSheet(it);
+    sec.appendChild(card);
+  });
+  mainEl.appendChild(sec);
+});
+
+/* scroll-spy for pills */
+const secObs=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){
+    const id=e.target.id.replace('sec-','');
+    [...pillsEl.children].forEach((p,i)=>p.setAttribute('aria-current', MENU[i].id===id?'true':'false'));
+    const active=[...pillsEl.children].find(p=>p.getAttribute('aria-current')==='true');
+    if(active) active.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+  }});
+},{rootMargin:'-45% 0px -50% 0px'});
+document.querySelectorAll('.sec').forEach(s=>secObs.observe(s));
+
+/* ---------------- carousel factory ---------------- */
+function buildCarousel(container, images, color, label, onImgTap){
+  let idx=0, w=0, startX=0, dx=0, dragging=false;
+  const track=document.createElement('div'); track.className='track'; track.dir='ltr';
+  images.forEach(src=>{
+    const s=document.createElement('div'); s.className='slide';
+    s.innerHTML=`<div class="slide-fallback" style="background:${tint(color)}">${label}</div>`;
+    const im=document.createElement('img'); im.src=src; im.alt=label; im.loading='lazy';
+    im.onerror=()=>im.remove();
+    s.appendChild(im); track.appendChild(s);
+  });
+  container.appendChild(track);
+
+  const dots=document.createElement('div'); dots.className='dots';
+  images.forEach((_,i)=>{const d=document.createElement('span'); d.className='dot'+(i===0?' on':''); dots.appendChild(d)});
+  container.appendChild(dots);
+
+  if(onImgTap){
+    const fb=document.createElement('button'); fb.className='fs-btn'; fb.innerHTML='⛶';
+    fb.onclick=e=>{e.stopPropagation(); onImgTap(images,color,label,idx)};
+    container.appendChild(fb);
+  }
+  function measure(){w=container.clientWidth}
+  function go(i){ idx=Math.max(0,Math.min(images.length-1,i));
+    track.style.transition='transform .3s cubic-bezier(.22,1,.36,1)';
+    track.style.transform=`translateX(${-idx*w}px)`;
+    [...dots.children].forEach((d,k)=>d.classList.toggle('on',k===idx)); }
+  measure(); window.addEventListener('resize',()=>{measure();track.style.transition='none';track.style.transform=`translateX(${-idx*w}px)`});
+
+  container.addEventListener('pointerdown',e=>{dragging=true;startX=e.clientX;dx=0;track.style.transition='none';container.setPointerCapture(e.pointerId)});
+  container.addEventListener('pointermove',e=>{if(!dragging)return;dx=e.clientX-startX;track.style.transform=`translateX(${-idx*w+dx}px)`});
+  const end=()=>{if(!dragging)return;dragging=false; if(Math.abs(dx)>w*0.18){ go(idx + (dx<0?1:-1)*(document.dir==='rtl'?1:1)); } else go(idx);};
+  container.addEventListener('pointerup',end); container.addEventListener('pointercancel',end);
+
+  // tap (not drag) on image -> fullscreen
+  if(onImgTap) container.addEventListener('click',e=>{ if(Math.abs(dx)<6 && !e.target.classList.contains('fs-btn')) onImgTap(images,color,label,idx) });
+  return {go};
+}
+
+/* ---------------- detail sheet ---------------- */
+const sheet=document.getElementById('sheet'), sheetBg=document.getElementById('sheetBg'),
+      sheetBody=document.getElementById('sheetBody');
+function openSheet(it){
+  sheetBody.innerHTML=`
+    <div class="car" id="detailCar"></div>
+    <h2>${it.name}</h2>
+    <div class="badges">
+      <span class="badge k">${fa(it.kcal)} کالری</span>
+      <span class="badge o">${fa(it.imgs.length)} تصویر</span>
+    </div>
+    <div class="block-t">ترکیبات</div>
+    <ul class="ings">${it.ing.map(g=>`<li>${g}</li>`).join('')}</ul>`;
+  buildCarousel(document.getElementById('detailCar'), it.imgs, it.color, it.name, openFs);
+  sheetBg.classList.add('on'); sheet.classList.add('on'); document.body.style.overflow='hidden';
+}
+function closeSheet(){sheetBg.classList.remove('on'); sheet.classList.remove('on'); document.body.style.overflow=''}
+document.getElementById('sheetClose').onclick=closeSheet; sheetBg.onclick=closeSheet;
+
+/* ---------------- fullscreen ---------------- */
+const fs=document.getElementById('fs'), fsTrack=document.getElementById('fsTrack'),
+      fsDots=document.getElementById('fsDots'), fsCount=document.getElementById('fsCount');
+let fsIdx=0,fsW=0,fsImgs=[];
+function openFs(images,color,label,start){
+  fsImgs=images; fsIdx=start||0; fsTrack.innerHTML=''; fsDots.innerHTML='';
+  images.forEach(src=>{const s=document.createElement('div'); s.className='slide';
+    s.innerHTML=`<div class="slide-fallback" style="background:${tint(color)}">${label}</div>`;
+    const im=document.createElement('img'); im.src=src; im.alt=label; im.onerror=()=>im.remove(); s.appendChild(im); fsTrack.appendChild(s);
+    const d=document.createElement('span'); d.className='dot'; fsDots.appendChild(d);});
+  fs.classList.add('on'); fsW=fs.clientWidth; place(); 
+}
+function place(){fsTrack.style.transition='transform .3s cubic-bezier(.22,1,.36,1)';
+  fsTrack.style.transform=`translateX(${-fsIdx*fsW}px)`;
+  fsCount.textContent=`${fa(fsIdx+1)} / ${fa(fsImgs.length)}`;
+  [...fsDots.children].forEach((d,k)=>d.classList.toggle('on',k===fsIdx));}
+(function(){let sx=0,d=0,drag=false;
+  fsTrack.style.display='flex'; fsTrack.style.height='100%';
+  fs.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;d=0;fsTrack.style.transition='none'});
+  fs.addEventListener('pointermove',e=>{if(!drag)return;d=e.clientX-sx;fsTrack.style.transform=`translateX(${-fsIdx*fsW+d}px)`});
+  const e2=()=>{if(!drag)return;drag=false; if(Math.abs(d)>fsW*0.15){fsIdx=Math.max(0,Math.min(fsImgs.length-1,fsIdx+(d<0?1:-1)))} place();};
+  fs.addEventListener('pointerup',e2); fs.addEventListener('pointercancel',e2);
+})();
+document.getElementById('fsClose').onclick=()=>fs.classList.remove('on');
+window.addEventListener('resize',()=>{if(fs.classList.contains('on')){fsW=fs.clientWidth;fsTrack.style.transition='none';place()}});
+</script>
+</body>
+</html>

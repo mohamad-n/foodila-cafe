@@ -1,0 +1,567 @@
+{
+  "categories": [
+    {
+      "title": "بار گرم",
+      "subtitle": "بر پایه قهوه",
+      "engTitle": "Hot Bar",
+      "items": [
+        {
+          "title": "اسپرسو 30*70 پایه روبوستا",
+          "enTitle": "30% Arabica, 70% Robusta Espresso",
+          "price": 120000,
+          "ingredients": "قهوه عربیکا ۳۰ درصد , قهوه روبوستا ۷۰ درصد , آب"
+        },
+        {
+          "title": "اسپرسو 100 روبوستا",
+          "enTitle": "100% Robusta Espresso",
+          "price": 120000,
+          "ingredients": "قهوه روبوستا , آب"
+        },
+        {
+          "title": "اسپرسو 100 عربیکا",
+          "enTitle": "100% Arabica Espresso",
+          "price": 150000,
+          "ingredients": "قهوه عربیکا , آب"
+        },
+        {
+          "title": "موکا",
+          "enTitle": "Mocha",
+          "price": 230000,
+          "ingredients": "اسپرسو , شیر , شکلات"
+        },
+        {
+          "title": "اسپرسو 50 عربیکا 50 روبوستا",
+          "enTitle": "50% Arabica, 50% Robusta Espresso",
+          "price": 130000,
+          "ingredients": "قهوه عربیکا ۵۰ درصد , قهوه روبوستا ۵۰ درصد , آب"
+        },
+        {
+          "title": "لاته کلاسیک",
+          "enTitle": "Classic Latte",
+          "price": 200000,
+          "ingredients": "اسپرسو , شیر بخار‌داده‌شده , فوم شیر"
+        },
+        {
+          "title": "لاته طعم‌دار",
+          "enTitle": "Flavored Latte",
+          "price": 220000,
+          "ingredients": "اسپرسو , شیر بخار‌داده‌شده , سیروپ طعم‌دار , فوم شیر"
+        },
+        {
+          "title": "کاپوچینو کلاسیک",
+          "enTitle": "Classic Cappuccino",
+          "price": 200000,
+          "ingredients": "اسپرسو , شیر بخار‌داده‌شده , فوم شیر"
+        },
+        {
+          "title": "آمریکانو",
+          "enTitle": "Americano",
+          "price": 135000,
+          "ingredients": "اسپرسو , آب داغ"
+        },
+        {
+          "title": "لاته بر پایه عربیکا",
+          "enTitle": "Arabica Latte",
+          "price": 250000,
+          "ingredients": "اسپرسو عربیکا , شیر بخار‌داده‌شده , فوم شیر"
+        },
+        {
+          "title": "ماچا لاته",
+          "enTitle": "Matcha Latte",
+          "price": 200000,
+          "ingredients": "پودر ماچا , شیر , آب گرم"
+        },
+        {
+          "title": "ماچا لاته طعم‌دار",
+          "enTitle": "Flavored Matcha Latte",
+          "price": 210000,
+          "ingredients": "پودر ماچا , شیر , آب گرم , سیروپ طعم‌دار"
+        },
+        {
+          "title": "کورتادو",
+          "enTitle": "Cortado",
+          "price": 145000,
+          "ingredients": "اسپرسو , شیر بخار‌داده‌شده"
+        },
+        {
+          "title": "قهوه ترک",
+          "enTitle": "Turkish Coffee",
+          "price": 140000,
+          "ingredients": "قهوه ترک , آب"
+        },
+        {
+          "title": "نسکافه",
+          "enTitle": "Instant Coffee",
+          "price": 200000,
+          "ingredients": "قهوه فوری , شیر , آب گرم"
+        },
+        {
+          "title": "نسکافه طعم‌دار",
+          "enTitle": "Flavored Instant Coffee",
+          "price": 210000,
+          "ingredients": "قهوه فوری , شیر , آب گرم , سیروپ طعم‌دار"
+        },
+        {
+          "title": "کارامل ماکیاتو",
+          "enTitle": "Caramel Macchiato",
+          "price": 210000,
+          "ingredients": "اسپرسو , شیر , سیروپ وانیل , سس کارامل , فوم شیر"
+        },
+        {
+          "title": "رومانو",
+          "enTitle": "Espresso Romano",
+          "price": 200000,
+          "ingredients": "اسپرسو , لیموترش"
+        },
+        {
+          "title": "شیر زعفران",
+          "enTitle": "Saffron Milk",
+          "price": 180000,
+          "ingredients": "شیر , زعفران , شیرین‌کننده"
+        },
+        {
+          "title": "شیر کاکائو",
+          "enTitle": "Chocolate Milk",
+          "price": 210000,
+          "ingredients": "شیر , پودر کاکائو , شکلات , شیرین‌کننده"
+        }
+      ]
+    },
+    {
+      "title": "چای و دمنوش",
+      "subtitle": null,
+      "engTitle": "Tea and Herbal Tea",
+      "items": [
+        {
+          "title": "چای سیاه",
+          "enTitle": "Black Tea",
+          "price": 70000,
+          "ingredients": "چای سیاه , آب جوش"
+        },
+        {
+          "title": "چای زعفران",
+          "enTitle": "Saffron Tea",
+          "price": 110000,
+          "ingredients": "چای سیاه , زعفران , آب جوش"
+        },
+        {
+          "title": "چای سبز",
+          "enTitle": "Green Tea",
+          "price": 100000,
+          "ingredients": "چای سبز , آب گرم"
+        },
+        {
+          "title": "چای خرما",
+          "enTitle": "Date Tea",
+          "price": 80000,
+          "ingredients": "چای سیاه , آب جوش , خرما"
+        },
+        {
+          "title": "چای باقلوا",
+          "enTitle": "Baklava Tea",
+          "price": 120000,
+          "ingredients": "چای سیاه , آب جوش , باقلوا"
+        },
+        {
+          "title": "دمنوش آرامش",
+          "enTitle": "Relaxing Herbal Tea",
+          "price": 100000,
+          "ingredients": "گل گاوزبان , سنبل‌الطیب , به‌لیمو , آب جوش"
+        },
+        {
+          "title": "دمنوش گل گاو زبان",
+          "enTitle": "Borage Herbal Tea",
+          "price": 120000,
+          "ingredients": "گل گاوزبان , لیموعمانی , آب جوش"
+        },
+        {
+          "title": "دمنوش بابونه",
+          "enTitle": "Chamomile Herbal Tea",
+          "price": 120000,
+          "ingredients": "گل بابونه , آب جوش"
+        },
+        {
+          "title": "دمنوش سرما خوردگی",
+          "enTitle": "Cold Relief Herbal Tea",
+          "price": 120000,
+          "ingredients": "آویشن , زنجبیل , دارچین , عسل , آب جوش"
+        },
+        {
+          "title": "دمنوش آویشن شیرازی",
+          "enTitle": "Shirazi Thyme Herbal Tea",
+          "price": 120000,
+          "ingredients": "آویشن شیرازی , آب جوش"
+        },
+        {
+          "title": "چای ترش",
+          "enTitle": "Hibiscus Tea",
+          "price": 100000,
+          "ingredients": "گل چای ترش , آب جوش"
+        }
+      ]
+    },
+    {
+      "title": "ماکتیل",
+      "subtitle": null,
+      "engTitle": "Mocktail",
+      "items": [
+        {
+          "title": "لیموناد",
+          "enTitle": "Lemonade",
+          "price": 180000,
+          "ingredients": "آب لیموترش تازه , آب , شکر , یخ"
+        },
+        {
+          "title": "موهیتو",
+          "enTitle": "Mojito",
+          "price": 200000,
+          "ingredients": "لیموترش تازه , برگ نعناع , شکر , آب گازدار , یخ"
+        },
+        {
+          "title": "رد موهیتو",
+          "enTitle": "Red Mojito",
+          "price": 220000,
+          "ingredients": "لیموترش تازه , برگ نعناع , سیروپ میوه قرمز , آب گازدار , یخ"
+        },
+        {
+          "title": "شربت زعفران",
+          "enTitle": "Saffron Drink",
+          "price": 100000,
+          "ingredients": "زعفران , گلاب , شکر , آب , یخ"
+        },
+        {
+          "title": "شربت بهارنارنج",
+          "enTitle": "Orange Blossom Drink",
+          "price": 90000,
+          "ingredients": "عرق بهارنارنج , شکر , آب , یخ"
+        }
+      ]
+    },
+    {
+      "title": "کیک و کوکی",
+      "subtitle": null,
+      "engTitle": "Cake and Cookie",
+      "items": [
+        {
+          "title": "تیرامیسو",
+          "enTitle": "Tiramisu",
+          "price": 230000
+        },
+        {
+          "title": "چیز کیک لوتوس",
+          "enTitle": "Lotus Cheesecake",
+          "price": 250000
+        },
+        {
+          "title": "کوکی نوتلا",
+          "enTitle": "Nutella Cookie",
+          "price": 120000
+        },
+        {
+          "title": "کوکی لوتوس",
+          "enTitle": "Lotus Cookie",
+          "price": 130000
+        },
+        {
+          "title": "کوکی شکلاتی",
+          "enTitle": "Chocolate Cookie",
+          "price": 120000
+        },
+        {
+          "title": "کوکی رژیمی شکلاتی",
+          "enTitle": "Diet Chocolate Cookie",
+          "price": 150000
+        },
+        {
+          "title": "کوکی کره بادام زمینی",
+          "enTitle": "Peanut Butter Cookie",
+          "price": 120000
+        },
+        {
+          "title": "کوکی رژیمی گردویی",
+          "enTitle": "Diet Walnut Cookie",
+          "price": 150000
+        },
+        {
+          "title": "کیک شکلاتی",
+          "enTitle": "Chocolate Cake",
+          "price": 150000
+        },
+        {
+          "title": "کیک سه شیر",
+          "enTitle": "Tres Leches Cake",
+          "price": 170000
+        },
+        {
+          "title": "پیراشکی",
+          "enTitle": "Cream-Filled Pastry",
+          "price": 110000
+        }
+      ]
+    },
+    {
+      "title": "نوشیدنی گرم",
+      "subtitle": null,
+      "engTitle": "Hot Drinks",
+      "items": [
+        {
+          "title": "کاپوچینو",
+          "enTitle": "Cappuccino",
+          "price": 200000,
+          "ingredients": "اسپرسو , شیر بخار‌داده‌شده , فوم شیر"
+        },
+        {
+          "title": "هات چاکلت",
+          "enTitle": "Hot Chocolate",
+          "price": 200000,
+          "ingredients": "شیر , شکلات , پودر کاکائو"
+        },
+        {
+          "title": "پینک چاکلت",
+          "enTitle": "Pink Chocolate",
+          "price": 200000,
+          "ingredients": "شیر , شکلات سفید , طعم‌دهنده توت‌فرنگی"
+        },
+        {
+          "title": "وایت چاکلت",
+          "enTitle": "White Hot Chocolate",
+          "price": 200000,
+          "ingredients": "شیر , شکلات سفید"
+        },
+        {
+          "title": "چای کرک",
+          "enTitle": "Karak Tea",
+          "price": 200000,
+          "ingredients": "چای سیاه , شیر , هل , دارچین , شکر"
+        },
+        {
+          "title": "چای ماسالا",
+          "enTitle": "Masala Chai",
+          "price": 200000,
+          "ingredients": "چای سیاه , شیر , دارچین , زنجبیل , هل , میخک , شکر"
+        },
+        {
+          "title": "شیر کاکائو",
+          "enTitle": "Chocolate Milk",
+          "price": 180000,
+          "ingredients": "شیر , پودر کاکائو , شکلات , شیرین‌کننده"
+        },
+        {
+          "title": "لاته ماچا",
+          "enTitle": "Matcha Latte",
+          "price": 220000,
+          "ingredients": "پودر ماچا , شیر , آب گرم"
+        }
+      ]
+    },
+    {
+      "title": "شیک و بستنی",
+      "subtitle": null,
+      "engTitle": "Shakes and Ice Cream",
+      "items": [
+        {
+          "title": "شیک وانیل",
+          "enTitle": "Vanilla Milkshake",
+          "price": 250000,
+          "ingredients": "بستنی وانیلی , شیر , وانیل"
+        },
+        {
+          "title": "شیک شکلات",
+          "enTitle": "Chocolate Milkshake",
+          "price": 270000,
+          "ingredients": "بستنی شکلاتی , شیر , سس شکلات"
+        },
+        {
+          "title": "شیک نسکافه",
+          "enTitle": "Coffee Milkshake",
+          "price": 285000,
+          "ingredients": "بستنی وانیلی , شیر , قهوه فوری"
+        },
+        {
+          "title": "شیک لوتوس",
+          "enTitle": "Lotus Milkshake",
+          "price": 340000,
+          "ingredients": "بستنی وانیلی , شیر , کرم بیسکویت لوتوس , بیسکویت لوتوس"
+        },
+        {
+          "title": "شیک نوتلا",
+          "enTitle": "Nutella Milkshake",
+          "price": 380000,
+          "ingredients": "بستنی وانیلی , شیر , نوتلا"
+        },
+        {
+          "title": "شیک توت فرنگی",
+          "enTitle": "Strawberry Milkshake",
+          "price": 265000,
+          "ingredients": "بستنی وانیلی , شیر , توت‌فرنگی"
+        },
+        {
+          "title": "شیک موز توت فرنگی",
+          "enTitle": "Banana Strawberry Milkshake",
+          "price": 320000,
+          "ingredients": "بستنی وانیلی , شیر , موز , توت‌فرنگی"
+        },
+        {
+          "title": "شیک پروتئین",
+          "enTitle": "Protein Milkshake",
+          "price": 330000,
+          "ingredients": "شیر , موز , پودر پروتئین , کره بادام‌زمینی"
+        },
+        {
+          "title": "بستنی وانیل",
+          "enTitle": "Vanilla Ice Cream",
+          "price": 60000
+        },
+        {
+          "title": "بستنی شکلاتی",
+          "enTitle": "Chocolate Ice Cream",
+          "price": 60000
+        },
+        {
+          "title": "بستنی توت فرنگی",
+          "enTitle": "Strawberry Ice Cream",
+          "price": 60000
+        },
+        {
+          "title": "شیک قهوه",
+          "enTitle": "Coffee Milkshake",
+          "price": 300000,
+          "ingredients": "بستنی وانیلی , شیر , اسپرسو"
+        },
+        {
+          "title": "شیک شاتوت",
+          "enTitle": "Mulberry Milkshake",
+          "price": 300000,
+          "ingredients": "بستنی وانیلی , شیر , شاتوت"
+        },
+        {
+          "title": "شیر موز",
+          "enTitle": "Banana Milk",
+          "price": 180000,
+          "ingredients": "شیر , موز , شیرین‌کننده"
+        },
+        {
+          "title": "بستنی شاتوت",
+          "enTitle": "Mulberry Ice Cream",
+          "price": 70000
+        },
+        {
+          "title": "شیک کره بادام زمینی",
+          "enTitle": "Peanut Butter Milkshake",
+          "price": 300000,
+          "ingredients": "بستنی وانیلی , شیر , کره بادام‌زمینی"
+        }
+      ]
+    },
+    {
+      "title": "اسموتی",
+      "subtitle": null,
+      "engTitle": "Smoothies",
+      "items": [
+        {
+          "title": "اسموتی توت فرنگی",
+          "enTitle": "Strawberry Smoothie",
+          "price": 220000,
+          "ingredients": "توت‌فرنگی , آبمیوه , یخ"
+        },
+        {
+          "title": "اسموتی طالبی",
+          "enTitle": "Cantaloupe Smoothie",
+          "price": 170000,
+          "ingredients": "طالبی , آبمیوه , یخ"
+        },
+        {
+          "title": "اسموتی هندوانه",
+          "enTitle": "Watermelon Smoothie",
+          "price": 120000,
+          "ingredients": "هندوانه , یخ"
+        },
+        {
+          "title": "اسموتی هندوانه توت فرنگی",
+          "enTitle": "Watermelon Strawberry Smoothie",
+          "price": 260000,
+          "ingredients": "هندوانه , توت‌فرنگی , یخ"
+        }
+      ]
+    },
+    {
+      "title": "بار سرد",
+      "subtitle": "بر پایه قهوه",
+      "engTitle": "Cold Bar",
+      "items": [
+        {
+          "title": "آیس آمریکانو",
+          "enTitle": "Iced Americano",
+          "price": 140000,
+          "ingredients": "اسپرسو , آب سرد , یخ"
+        },
+        {
+          "title": "آیس موکا",
+          "enTitle": "Iced Mocha",
+          "price": 240000,
+          "ingredients": "اسپرسو , شیر , شکلات , یخ"
+        },
+        {
+          "title": "آیس لاته کلاسیک",
+          "enTitle": "Classic Iced Latte",
+          "price": 220000,
+          "ingredients": "اسپرسو , شیر , یخ"
+        },
+        {
+          "title": "آیس لاته طعم‌دار",
+          "enTitle": "Flavored Iced Latte",
+          "price": 230000,
+          "ingredients": "اسپرسو , شیر , سیروپ طعم‌دار , یخ"
+        },
+        {
+          "title": "آیس ماچا لاته",
+          "enTitle": "Iced Matcha Latte",
+          "price": 220000,
+          "ingredients": "پودر ماچا , شیر , آب , یخ"
+        },
+        {
+          "title": "آیس ماچا با عسل",
+          "enTitle": "Iced Matcha with Honey",
+          "price": 250000,
+          "ingredients": "پودر ماچا , شیر , عسل , آب , یخ"
+        },
+        {
+          "title": "آیس کارامل ماکیاتو",
+          "enTitle": "Iced Caramel Macchiato",
+          "price": 240000,
+          "ingredients": "اسپرسو , شیر , سیروپ وانیل , سس کارامل , یخ"
+        },
+        {
+          "title": "آیس آمریکانو با آب سودا",
+          "enTitle": "Sparkling Iced Americano",
+          "price": 160000,
+          "ingredients": "اسپرسو , آب گازدار , یخ"
+        },
+        {
+          "title": "آیس لاته بر پایه عربیکا",
+          "enTitle": "Arabica Iced Latte",
+          "price": 260000,
+          "ingredients": "اسپرسو عربیکا , شیر , یخ"
+        },
+        {
+          "title": "آیس ماچا نارگیل",
+          "enTitle": "Iced Coconut Matcha",
+          "price": 220000,
+          "ingredients": "پودر ماچا , شیر نارگیل , آب , یخ"
+        },
+        {
+          "title": "آیس ماچا دارچین",
+          "enTitle": "Iced Cinnamon Matcha",
+          "price": 220000,
+          "ingredients": "پودر ماچا , شیر , دارچین , آب , یخ"
+        },
+        {
+          "title": "آیس کافی",
+          "enTitle": "Iced Coffee",
+          "price": 140000,
+          "ingredients": "قهوه , آب سرد , یخ"
+        }
+      ]
+    }
+  ]
+}

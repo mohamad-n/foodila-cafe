@@ -1,0 +1,109 @@
+# Rendered by the nginx image's envsubst at startup (DOMAIN / CDN_HOST / S3_HOST come from the
+# service environment). nginx's own runtime vars ($host, $scheme, …) are NOT in the env, so they
+# pass through untouched. One SAN certificate (named after DOMAIN) covers all three hostnames.
+
+# WebSocket/upgrade passthrough (harmless for the standalone server; future-proof).
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+# ---- HTTP: ACME challenge + redirect everything else to HTTPS ----
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN} ${CDN_HOST} ${S3_HOST};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ---- App (apex) ----
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    add_header Strict-Transport-Security "max-age=63072000" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json image/svg+xml;
+    gzip_min_length 1024;
+
+    client_max_body_size 2m;
+
+    location / {
+        proxy_pass http://app:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+}
+
+# ---- imgproxy (cdn.<domain>) — signed image transforms, long browser cache ----
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${CDN_HOST};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    add_header Strict-Transport-Security "max-age=63072000" always;
+
+    location / {
+        proxy_pass http://imgproxy:8080;
+        proxy_set_header Host $host;
+        # Transformed images are immutable (the source key never changes) — cache hard in the browser.
+        add_header Cache-Control "public, max-age=2592000, immutable";
+    }
+}
+
+# ---- MinIO (s3.<domain>) — browser presigned uploads only ----
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name ${S3_HOST};
+
+    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    add_header Strict-Transport-Security "max-age=63072000" always;
+
+    # Item photos — allow generous upload size. MinIO emits its own CORS headers (do not add them here).
+    client_max_body_size 30m;
+
+    location / {
+        proxy_pass http://minio:9000;
+        proxy_http_version 1.1;
+        # Host + path MUST be preserved unchanged — they're part of the S3 SigV4 signature.
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_request_buffering off; # stream large uploads straight to MinIO
+    }
+}

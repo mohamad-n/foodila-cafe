@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>منوی کافه — اتود ۲ (مدرن و مینیمال)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== Étude 2 — Clean & Modern / Scandi =====
+     palette: white, off-white, near-black ink, single muted sage accent */
+  :root{
+    --bg:#FFFFFF; --bg-2:#F6F5F3; --ink:#14130F; --soft:#8A877E;
+    --line:#ECEAE5; --sage:#7C8B72; --sage-deep:#5F6E55;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:"Vazirmatn",Tahoma,system-ui,sans-serif; background:var(--bg); color:var(--ink);
+       -webkit-font-smoothing:antialiased; overscroll-behavior-y:none}
+  .wrap{max-width:520px; margin:0 auto; min-height:100vh}
+
+  header{padding:30px 22px 16px; text-align:center}
+  .logo{font-size:26px; font-weight:700; letter-spacing:.02em}
+  .dot{display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--sage); margin:0 6px; vertical-align:middle}
+  .tag{font-size:12.5px; color:var(--soft); margin-top:6px; letter-spacing:.04em}
+
+  /* tab bar */
+  .tabs-wrap{position:sticky; top:0; z-index:30; background:rgba(255,255,255,.92);
+             backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
+  .tabs{display:flex; gap:0; overflow-x:auto; scrollbar-width:none; padding:0 12px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto; background:none; border:none; padding:15px 14px 13px; font-size:14.5px;
+       font-weight:500; color:var(--soft); cursor:pointer; position:relative; white-space:nowrap;
+       font-family:inherit}
+  .tab[aria-current="true"]{color:var(--ink); font-weight:600}
+  .tab[aria-current="true"]::after{content:""; position:absolute; inset-inline:14px; bottom:0;
+       height:2px; background:var(--ink); border-radius:2px}
+
+  /* grid */
+  main{padding:18px 16px 80px}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .card{cursor:pointer}
+  .sq{position:relative; width:100%; aspect-ratio:1/1; border-radius:14px; overflow:hidden; background:var(--bg-2)}
+  .sq img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s}
+  .card:active .sq img{transform:scale(.97)}
+  .cap{padding:10px 2px 2px}
+  .cap h3{margin:0; font-size:15px; font-weight:600}
+  .cap .meta{display:flex; align-items:center; gap:6px; margin-top:3px}
+  .cap .kcal{font-size:12px; color:var(--soft)}
+  .cap .ing{font-size:11.5px; color:var(--soft); margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+  /* full-page detail */
+  .page{position:fixed; inset:0; z-index:80; max-width:520px; margin:0 auto; background:var(--bg);
+        transform:translateX(-100%); transition:transform .3s cubic-bezier(.22,1,.36,1); overflow:auto}
+  [dir="rtl"] .page{transform:translateX(100%)}
+  .page.on{transform:translateX(0)!important}
+  .pbar{position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:10px;
+        padding:14px 16px; background:rgba(255,255,255,.92); backdrop-filter:blur(10px)}
+  .back{background:var(--bg-2); border:none; width:38px; height:38px; border-radius:50%; font-size:18px;
+        cursor:pointer; color:var(--ink)}
+  .pbar .t{font-size:14px; color:var(--soft)}
+  .ppad{padding:4px 20px 40px}
+  .ppad h1{font-size:27px; font-weight:700; margin:18px 0 12px}
+  .badges{display:flex; gap:8px; margin:0 0 22px}
+  .badge{font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:8px; background:var(--bg-2); color:var(--ink)}
+  .badge.s{background:#EEF1EA; color:var(--sage-deep)}
+  .lbl{font-size:12px; font-weight:600; letter-spacing:.08em; color:var(--soft); text-transform:uppercase; margin:0 0 12px}
+  .ings{margin:0; padding:0; list-style:none; border-top:1px solid var(--line)}
+  .ings li{padding:14px 2px; font-size:15px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px}
+  .ings li::before{content:""; width:5px; height:5px; border-radius:50%; background:var(--sage)}
+
+  /* carousel */
+  .car{position:relative; border-radius:16px; overflow:hidden; background:var(--bg-2); aspect-ratio:4/3; touch-action:pan-y}
+  .track{display:flex; height:100%; will-change:transform}
+  .slide{flex:0 0 100%; height:100%; position:relative}
+  .slide img{width:100%; height:100%; object-fit:cover; display:block}
+  .slide-fallback{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+                  color:#fff; font-weight:600; font-size:15px}
+  .dots{position:absolute; inset-block-end:12px; inset-inline:0; display:flex; gap:6px; justify-content:center; z-index:3}
+  .pd{width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.6); transition:.2s}
+  .pd.on{width:18px; border-radius:4px; background:#fff}
+  .fs-btn{position:absolute; inset-block-start:10px; inset-inline-start:10px; z-index:3; background:rgba(255,255,255,.9);
+          border:none; width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:15px}
+
+  /* fullscreen */
+  .fs{position:fixed; inset:0; z-index:120; background:#0a0a0a; display:none}
+  .fs.on{display:block}
+  .fs .track{height:100%}
+  .fs .slide{display:flex; align-items:center; justify-content:center}
+  .fs .slide img{width:100%; height:100%; object-fit:contain}
+  .fs-close{position:absolute; inset-block-start:14px; inset-inline-start:14px; z-index:5; background:rgba(255,255,255,.15);
+            color:#fff; border:none; width:42px; height:42px; border-radius:50%; font-size:20px; cursor:pointer}
+  .fs-count{position:absolute; inset-block-start:20px; inset-inline-end:18px; z-index:5; color:#fff; font-size:14px; opacity:.85}
+  .fs .dots{inset-block-end:22px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">N O R D<span class="dot"></span>C A F É</div>
+    <div class="tag">قهوهٔ دست‌چین · فضای آرام</div>
+  </header>
+  <div class="tabs-wrap"><div class="tabs" id="tabs"></div></div>
+  <main><div class="grid" id="grid"></div></main>
+</div>
+
+<div class="page" id="page">
+  <div class="pbar"><button class="back" id="back" aria-label="بازگشت">→</button><span class="t" id="pbarT"></span></div>
+  <div class="ppad" id="pbody"></div>
+</div>
+
+<div class="fs" id="fs">
+  <button class="fs-close" id="fsClose" aria-label="بستن">✕</button>
+  <div class="fs-count" id="fsCount"></div>
+  <div class="track" id="fsTrack"></div>
+  <div class="dots" id="fsDots"></div>
+</div>
+
+<script>
+const fa = n => String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+const IMG = {
+  11:['1568713852733-56590b197f4f','1509042239860-f550ce710b93','1511920170033-f8396924c348'],
+  21:['1559496417-e7f25cb247f3','1509042239860-f550ce710b93','1568713852733-56590b197f4f'],
+  31:['1512568400610-62da28bc8a13','1541167760496-1628856ab772','1556742526-795a8eac090e'],
+  41:['1553962311-62f2471b159d','1556742526-795a8eac090e','1511920170033-f8396924c348'],
+  51:['1577805947697-89e18249d767','1509042239860-f550ce710b93','1602351447937-745cb720612f'],
+  61:['1461023058943-07fcbe16d735','1549652127-2e5e59e86a7a','1533007716222-4b465613a984'],
+  71:['1517701550927-30cf4ba1dba5','1549652127-2e5e59e86a7a','1447933601403-0c6688de566e'],
+  81:['1592663527359-cf6642f54cff','1533007716222-4b465613a984','1568713852733-56590b197f4f'],
+  91:['1717603545758-88cc454db69b','1704079698754-5e621edb610b','1495474472287-4d71bcdd2085'],
+  101:['1506619216599-9d16d0903dfd','1610632380989-680fe40816c6','1495474472287-4d71bcdd2085'],
+  111:['1610632380989-680fe40816c6','1506619216599-9d16d0903dfd','1447933601403-0c6688de566e'],
+  121:['1572490122747-3968b75cc699','1553787499-6f9133860278','1577805947697-89e18249d767'],
+  131:['1583024012457-b6de05b7003a','1553787499-6f9133860278','1621303837174-89787a7d4729'],
+  141:['1623334044303-241021148842','1556742526-795a8eac090e','1495474472287-4d71bcdd2085'],
+  151:['1588195538326-c5b1e9f80a1b','1621303837174-89787a7d4729','1563729784474-d77dbb933a9e'],
+  161:['1602351447937-745cb720612f','1563729784474-d77dbb933a9e','1577805947697-89e18249d767'],
+};
+const U = (id,w) => `https://images.unsplash.com/photo-${id}?w=${w||900}&q=70&auto=format&fit=crop`;
+const img = (tags, base) => (IMG[base]||[]).map(id => U(id));
+const MENU = [
+  { id:'hot', name:'قهوهٔ گرم', items:[
+    {id:'espresso', name:'اسپرسو', kcal:5,  color:'#3b2415', ing:['دانهٔ آرابیکا','آب'], imgs:img('espresso,coffee',11)},
+    {id:'americano',name:'آمریکانو', kcal:10, color:'#4a2e1c', ing:['شات اسپرسو','آب داغ'], imgs:img('americano,coffee',21)},
+    {id:'cappuccino',name:'کاپوچینو', kcal:120,color:'#8a5a36', ing:['اسپرسو','شیر بخارپز','فوم شیر'], imgs:img('cappuccino,coffee',31)},
+    {id:'latte', name:'لاته', kcal:150, color:'#b07d4f', ing:['اسپرسو','شیر بخارپز','کمی فوم'], imgs:img('latte,coffee',41)},
+    {id:'mocha', name:'موکا', kcal:290, color:'#5a3722', ing:['اسپرسو','شیر','سس شکلات','خامه'], imgs:img('mocha,chocolate,coffee',51)},
+  ]},
+  { id:'cold', name:'قهوهٔ سرد', items:[
+    {id:'icelatte', name:'آیس‌لاته', kcal:130, color:'#c89a6a', ing:['اسپرسو','شیر سرد','یخ'], imgs:img('iced,latte,coffee',61)},
+    {id:'coldbrew', name:'کلد برو', kcal:15, color:'#2f1d12', ing:['قهوهٔ دم‌سرد ۱۸ ساعته','آب','یخ'], imgs:img('coldbrew,coffee',71)},
+    {id:'affogato', name:'آفوگاتو', kcal:240, color:'#6b4429', ing:['بستنی وانیل','شات اسپرسو'], imgs:img('affogato,icecream,coffee',81)},
+  ]},
+  { id:'tea', name:'دمنوش و چای', items:[
+    {id:'matcha', name:'ماچا لاته', kcal:140, color:'#6f8f4e', ing:['پودر ماچا','شیر بخارپز','کمی شکر'], imgs:img('matcha,latte',91)},
+    {id:'blacktea',name:'چای سیاه', kcal:2, color:'#7a4a2b', ing:['چای سیاه دم‌کشیده','آب'], imgs:img('blacktea,tea',101)},
+    {id:'masala', name:'چای ماسالا', kcal:160, color:'#9c6b3f', ing:['چای سیاه','شیر','هل','دارچین','زنجبیل'], imgs:img('chai,tea,spice',111)},
+  ]},
+  { id:'shake', name:'شیک و اسموتی', items:[
+    {id:'chocoshake', name:'شیک شکلات', kcal:420, color:'#4e2f1d', ing:['شیر','بستنی شکلاتی','سس شکلات'], imgs:img('chocolate,milkshake',121)},
+    {id:'strawsmoothie', name:'اسموتی توت‌فرنگی', kcal:180, color:'#c2596b', ing:['توت‌فرنگی تازه','ماست','عسل'], imgs:img('strawberry,smoothie',131)},
+  ]},
+  { id:'bakery', name:'کیک و دسر', items:[
+    {id:'croissant', name:'کروسان کره‌ای', kcal:270, color:'#caa15e', ing:['آرد','کرهٔ تازه','مخمر','نمک'], imgs:img('croissant,bakery',141)},
+    {id:'cheesecake', name:'چیزکیک', kcal:350, color:'#e4cf9e', ing:['پنیر خامه‌ای','بیسکویت','خامه'], imgs:img('cheesecake,dessert',151)},
+    {id:'brownie', name:'براونی', kcal:330, color:'#3d2417', ing:['شکلات تلخ','کره','تخم‌مرغ','آرد'], imgs:img('brownie,chocolate',161)},
+  ]},
+];
+function tint(hex){return `linear-gradient(140deg, ${hex} 0%, ${shade(hex,-22)} 100%)`}
+function shade(hex,p){let n=parseInt(hex.slice(1),16),r=(n>>16)+p,g=(n>>8&255)+p,b=(n&255)+p;
+  const c=v=>Math.max(0,Math.min(255,v));return '#'+(c(r)<<16|c(g)<<8|c(b)).toString(16).padStart(6,'0')}
+
+const tabsEl=document.getElementById('tabs'), gridEl=document.getElementById('grid');
+let current=0;
+MENU.forEach((cat,ci)=>{
+  const t=document.createElement('button'); t.className='tab'; t.textContent=cat.name;
+  if(ci===0)t.setAttribute('aria-current','true');
+  t.onclick=()=>{current=ci; renderTabs(); renderGrid();
+    t.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'});
+    document.querySelector('main').scrollIntoView({behavior:'smooth',block:'start'})};
+  tabsEl.appendChild(t);
+});
+function renderTabs(){[...tabsEl.children].forEach((t,i)=>t.setAttribute('aria-current', i===current?'true':'false'))}
+function renderGrid(){
+  gridEl.innerHTML='';
+  MENU[current].items.forEach(it=>{
+    const c=document.createElement('article'); c.className='card';
+    c.innerHTML=`
+      <div class="sq" style="background:${tint(it.color)}">
+        <img src="${it.imgs[0]}" alt="${it.name}" loading="lazy" onerror="this.style.display='none'">
+      </div>
+      <div class="cap"><h3>${it.name}</h3>
+        <div class="ing">${it.ing.join('، ')}</div>
+        <div class="meta"><span class="kcal">${fa(it.kcal)} کالری</span></div>
+      </div>`;
+    c.onclick=()=>openPage(it);
+    gridEl.appendChild(c);
+  });
+}
+renderGrid();
+
+/* carousel factory */
+function buildCarousel(container, images, color, label, onTap){
+  let idx=0,w=0,sx=0,d=0,drag=false;
+  const track=document.createElement('div'); track.className='track'; track.dir='ltr';
+  images.forEach(src=>{const s=document.createElement('div'); s.className='slide';
+    s.innerHTML=`<div class="slide-fallback" style="background:${tint(color)}">${label}</div>`;
+    const im=document.createElement('img'); im.src=src; im.alt=label; im.loading='lazy'; im.onerror=()=>im.remove();
+    s.appendChild(im); track.appendChild(s)});
+  container.appendChild(track);
+  const dots=document.createElement('div'); dots.className='dots';
+  images.forEach((_,i)=>{const p=document.createElement('span'); p.className='pd'+(i===0?' on':''); dots.appendChild(p)});
+  container.appendChild(dots);
+  const fb=document.createElement('button'); fb.className='fs-btn'; fb.innerHTML='⛶';
+  fb.onclick=e=>{e.stopPropagation(); onTap(images,color,label,idx)}; container.appendChild(fb);
+  const measure=()=>w=container.clientWidth;
+  const go=i=>{idx=Math.max(0,Math.min(images.length-1,i));
+    track.style.transition='transform .3s cubic-bezier(.22,1,.36,1)'; track.style.transform=`translateX(${-idx*w}px)`;
+    [...dots.children].forEach((p,k)=>p.classList.toggle('on',k===idx))};
+  measure();
+  container.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;d=0;track.style.transition='none';container.setPointerCapture(e.pointerId)});
+  container.addEventListener('pointermove',e=>{if(!drag)return;d=e.clientX-sx;track.style.transform=`translateX(${-idx*w+d}px)`});
+  const end=()=>{if(!drag)return;drag=false; if(Math.abs(d)>w*0.18) go(idx+(d<0?1:-1)); else go(idx)};
+  container.addEventListener('pointerup',end); container.addEventListener('pointercancel',end);
+  container.addEventListener('click',e=>{if(Math.abs(d)<6 && !e.target.classList.contains('fs-btn')) onTap(images,color,label,idx)});
+}
+
+/* full page detail */
+const page=document.getElementById('page'), pbody=document.getElementById('pbody'), pbarT=document.getElementById('pbarT');
+function openPage(it){
+  pbarT.textContent=MENU[current].name;
+  pbody.innerHTML=`
+    <div class="car" id="detailCar"></div>
+    <h1>${it.name}</h1>
+    <div class="badges"><span class="badge s">${fa(it.kcal)} کالری</span><span class="badge">${fa(it.imgs.length)} تصویر</span></div>
+    <p class="lbl">ترکیبات</p>
+    <ul class="ings">${it.ing.map(g=>`<li>${g}</li>`).join('')}</ul>`;
+  buildCarousel(document.getElementById('detailCar'), it.imgs, it.color, it.name, openFs);
+  page.classList.add('on'); document.body.style.overflow='hidden';
+}
+document.getElementById('back').onclick=()=>{page.classList.remove('on'); document.body.style.overflow=''};
+
+/* fullscreen */
+const fs=document.getElementById('fs'), fsTrack=document.getElementById('fsTrack'),
+      fsDots=document.getElementById('fsDots'), fsCount=document.getElementById('fsCount');
+let fsIdx=0,fsW=0,fsImgs=[];
+function openFs(images,color,label,start){
+  fsImgs=images; fsIdx=start||0; fsTrack.innerHTML=''; fsDots.innerHTML='';
+  images.forEach(src=>{const s=document.createElement('div'); s.className='slide';
+    s.innerHTML=`<div class="slide-fallback" style="background:${tint(color)}">${label}</div>`;
+    const im=document.createElement('img'); im.src=src; im.alt=label; im.onerror=()=>im.remove(); s.appendChild(im); fsTrack.appendChild(s);
+    const d=document.createElement('span'); d.className='pd'; fsDots.appendChild(d)});
+  fs.classList.add('on'); fsW=fs.clientWidth; place();
+}
+function place(){fsTrack.style.transition='transform .3s cubic-bezier(.22,1,.36,1)';
+  fsTrack.style.transform=`translateX(${-fsIdx*fsW}px)`; fsCount.textContent=`${fa(fsIdx+1)} / ${fa(fsImgs.length)}`;
+  [...fsDots.children].forEach((d,k)=>d.classList.toggle('on',k===fsIdx))}
+(function(){let sx=0,d=0,drag=false; fsTrack.style.display='flex'; fsTrack.style.height='100%';
+  fs.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;d=0;fsTrack.style.transition='none'});
+  fs.addEventListener('pointermove',e=>{if(!drag)return;d=e.clientX-sx;fsTrack.style.transform=`translateX(${-fsIdx*fsW+d}px)`});
+  const e2=()=>{if(!drag)return;drag=false; if(Math.abs(d)>fsW*0.15){fsIdx=Math.max(0,Math.min(fsImgs.length-1,fsIdx+(d<0?1:-1)))} place()};
+  fs.addEventListener('pointerup',e2); fs.addEventListener('pointercancel',e2)})();
+document.getElementById('fsClose').onclick=()=>fs.classList.remove('on');
+window.addEventListener('resize',()=>{if(fs.classList.contains('on')){fsW=fs.clientWidth;fsTrack.style.transition='none';place()}});
+</script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+/* Public menu styles. Token-driven (vars are the stable contract); structural layout scoped per
+   [data-template]. RTL document; the carousel .track is the one dir="ltr" island. */
+
+/* ---- token defaults + per-template sets (overridden by ThemeScope inline vars) ---- */
+.menu-root {
+  --bg: #0e0c0b; --ink: #f3ecdf; --soft: #a89c8b; --accent: #c9a24b;
+  --panel: #171311; --line: rgba(243, 236, 223, 0.14); --radius: 18px;
+}
+.menu-root[data-template="warm"] {
+  --bg: #f3ebdc; --ink: #2a1e15; --soft: #6b5a48; --accent: #b9752a;
+  --accent-2: #6e7a4e; --panel: #fbf6ec; --line: #e0d2b8; --radius: 24px;
+}
+.menu-root[data-template="scandi"] {
+  --bg: #ffffff; --ink: #14130f; --soft: #8a877e; --accent: #7c8b72;
+  --panel: #f6f5f3; --line: #eceae5; --radius: 14px;
+}
+.menu-root[data-template="editorial"] {
+  --bg: #0e0c0b; --ink: #f3ecdf; --soft: #a89c8b; --accent: #c9a24b;
+  --panel: #171311; --line: rgba(243, 236, 223, 0.14); --radius: 18px;
+}
+
+.menu-root { background: var(--bg); color: var(--ink); min-height: 100vh; }
+.menu-root * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+.menu-root button { font-family: inherit; cursor: pointer; }
+/* Visible keyboard focus for the bespoke menu controls (mouse/touch unaffected). */
+.menu-root :focus-visible,
+.fs :focus-visible,
+.sheet :focus-visible { outline: 2px solid var(--accent, #c9a24b); outline-offset: 2px; border-radius: 6px; }
+.menu-root .empty { padding: 80px 24px; text-align: center; color: var(--soft); }
+.menu-root .ph { position: absolute; inset: 0; background: var(--panel); }
+
+/* ---- café logo: visual-left of the header (inline-end under RTL); name stays at the start ---- */
+.menu-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.menu-logo { height: 30px; width: auto; max-width: 120px; object-fit: contain; display: block; }
+[data-template="editorial"] .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+/* ---- price accents (per template + detail) ---- */
+[data-template="warm"] .w-price { color: var(--accent); font-weight: 700; }
+[data-template="scandi"] .s-price { display: block; margin-block-start: 2px; font-size: 13px; font-weight: 600; color: var(--accent); }
+[data-template="editorial"] .pill-price { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+.detail .badge-price { background: none; border-color: transparent; padding: 0; color: var(--accent); font-weight: 700; font-size: 17px; }
+
+/* ---- shared photo (blurhash LQIP behind the real image) ---- */
+.menu-root .photo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.menu-root .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---- shared carousel + fullscreen primitives ---- */
+/* Square (1:1): the drawer + carousel show items square. One source image, object-fit: cover frames
+   it here (square) and in the editorial bg (vertical) — no server-side resizing/variants. */
+.menu-root .car { position: relative; border-radius: var(--radius); overflow: hidden; background: var(--panel); aspect-ratio: 1 / 1; touch-action: pan-y; }
+.menu-root .car .track { display: flex; height: 100%; will-change: transform; }
+.menu-root .car .slide { flex: 0 0 100%; height: 100%; position: relative; }
+.menu-root .dots { position: absolute; inset-block-end: 14px; inset-inline: 0; display: flex; gap: 6px; justify-content: center; z-index: 3; }
+.menu-root .pd { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.5); transition: 0.2s; }
+.menu-root .pd.on { width: 20px; border-radius: 4px; background: var(--accent); }
+/* Fullscreen trigger lives at the bottom-right corner (clear of the drawer header + centred dots). */
+.menu-root .fs-btn { position: absolute; inset-block-end: 12px; inset-inline-start: 12px; z-index: 4; display: grid; place-items: center; background: rgba(14, 12, 11, 0.6); border: 1px solid var(--line); color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 15px; }
+
+.fs { position: fixed; inset: 0; z-index: 130; background: var(--bg); }
+.fs .track { display: flex; height: 100%; will-change: transform; }
+.fs .slide { flex: 0 0 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; }
+/* Square crop sized by the shorter viewport edge (width on mobile portrait); centered vertically,
+   with a solid theme background filling the rest. The cover img fully hides the blurhash LQIP. */
+.fs .photo { position: relative; inset: auto; width: min(100%, 100vh); height: auto; aspect-ratio: 1 / 1; background: var(--bg); }
+.fs .photo img { width: 100%; height: 100%; object-fit: cover; }
+.fs-close { position: absolute; inset-block-start: 14px; inset-inline-start: 14px; z-index: 5; background: var(--panel); color: var(--ink); border: 1px solid var(--line); width: 42px; height: 42px; border-radius: 50%; font-size: 20px; }
+.fs-count { position: absolute; inset-block-start: 20px; inset-inline-end: 18px; z-index: 5; color: var(--ink); font-size: 14px; opacity: 0.85; }
+.fs .dots { inset-block-end: 22px; }
+
+/* ---- shared detail body ---- */
+.detail .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 22px 0 14px; }
+.detail .detail-head .detail-title { margin: 0; }
+.detail .detail-head .badge-price { flex-shrink: 0; white-space: nowrap; }
+.detail .detail-title { font-size: 31px; font-weight: 900; margin: 22px 0 14px; letter-spacing: -0.01em; }
+.detail .badges { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 22px; }
+.detail .badge { font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 100px; border: 1px solid var(--line); color: var(--ink); }
+.detail .badge .g { color: var(--accent); }
+.detail .detail-desc { color: var(--soft); line-height: 1.9; margin: 0 0 22px; }
+/* Section title — deliberately larger than the ingredient text below it. */
+.detail .lbl { font-size: 19px; font-weight: 700; color: var(--ink); margin: 0 0 8px; }
+/* Ingredients on one line, separated by " - " (smaller than the title, muted). */
+.detail .ings { margin: 0; font-size: 13px; line-height: 1.9; color: var(--soft); }
+
+/* ---- shared drawer header (sticky strip above the hero image; holds close + swipe handle) ---- */
+.drawer-head { position: sticky; inset-block-start: 0; z-index: 20; background: var(--bg); display: flex; align-items: center; justify-content: flex-start; min-height: 56px; padding: 14px 16px 8px; touch-action: none; cursor: grab; }
+.drawer-grab { position: absolute; inset-inline: 0; inset-block-start: 8px; width: 44px; height: 4px; border-radius: 4px; background: var(--line); margin-inline: auto; }
+.drawer-close { display: grid; place-items: center; background: var(--panel); border: 1px solid var(--line); color: var(--ink); width: 40px; height: 40px; border-radius: 50%; font-size: 16px; }
+
+/* ---- bottom sheet (Warm / Scandi) ---- */
+.sheet-backdrop { position: fixed; inset: 0; z-index: 120; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-end; }
+.sheet { background: var(--bg); color: var(--ink); width: 100%; max-width: 520px; margin: 0 auto; max-height: 92vh; overflow: auto; border-start-start-radius: 22px; border-start-end-radius: 22px; position: relative; padding: 0; }
+.sheet-body { padding: 4px 22px 40px; }
+
+/* ===================== EDITORIAL ===================== */
+[data-template="editorial"] .top { position: fixed; top: 0; inset-inline: 0; z-index: 40; max-width: 520px; margin: 0 auto; padding: 16px 16px 26px; background: linear-gradient(to bottom, rgba(14, 12, 11, 0.92), rgba(14, 12, 11, 0)); }
+[data-template="editorial"] .brand { padding: 0 4px 12px; }
+[data-template="editorial"] .brand .n { font-size: 19px; font-weight: 700; letter-spacing: 0.04em; }
+[data-template="editorial"] .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+[data-template="editorial"] .chips::-webkit-scrollbar { display: none; }
+[data-template="editorial"] .chip { flex: 0 0 auto; background: rgba(243, 236, 223, 0.08); color: var(--soft); border: 1px solid var(--line); padding: 8px 15px; border-radius: 100px; font-size: 13.5px; font-weight: 500; white-space: nowrap; transition: 0.2s; }
+[data-template="editorial"] .chip[aria-current="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); font-weight: 600; }
+[data-template="editorial"] .feed { height: 100vh; max-width: 520px; margin: 0 auto; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; }
+[data-template="editorial"] .feed::-webkit-scrollbar { display: none; }
+[data-template="editorial"] .slideItem { height: 100vh; scroll-snap-align: start; position: relative; display: flex; align-items: flex-end; overflow: hidden; }
+/* Image is centered with side margins (not full-bleed) and rounded; scrim matches its bounds. */
+[data-template="editorial"] .bgimg { position: absolute; inset-block: 14px; inset-inline: 16px; border-radius: 22px; overflow: hidden; background-size: cover; background-position: center; }
+/* Sharp photo = portrait 4:5 cover crop, centered vertically (a vertical crop — not full square,
+   not the over-cropped full-bleed). The blurhash backdrop (set on .bgimg) fills the rest. Tune the
+   amount of vertical crop with the aspect-ratio below (taller ratio = more side crop). */
+[data-template="editorial"] .bgimg .photo { position: absolute; inset: 0; margin: auto; width: 100%; height: auto; aspect-ratio: 4 / 5; background: none; }
+[data-template="editorial"] .bgimg .photo img { object-fit: cover; }
+[data-template="editorial"] .scrim { position: absolute; inset-block: 14px; inset-inline: 16px; border-radius: 22px; background: linear-gradient(to top, rgba(8, 6, 5, 0.92) 6%, rgba(8, 6, 5, 0.35) 40%, rgba(8, 6, 5, 0.15) 70%, rgba(8, 6, 5, 0.45) 100%); }
+[data-template="editorial"] .num { position: absolute; inset-block-start: 96px; inset-inline-end: 18px; font-size: 84px; font-weight: 900; color: rgba(243, 236, 223, 0.1); line-height: 0.8; letter-spacing: -0.04em; }
+[data-template="editorial"] .meta { position: relative; z-index: 2; padding: 0 24px 92px; width: 100%; }
+[data-template="editorial"] .cat-eyebrow { font-size: 12px; letter-spacing: 0.2em; color: var(--accent); margin-bottom: 10px; }
+[data-template="editorial"] .meta h2 { font-size: 40px; font-weight: 900; margin: 0 0 12px; line-height: 1.05; letter-spacing: -0.01em; }
+[data-template="editorial"] .meta .ing { font-size: 14px; color: var(--soft); line-height: 1.8; max-width: 88%; margin: 0 0 16px; }
+[data-template="editorial"] .rowmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 18px; }
+[data-template="editorial"] .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; border: 1px solid var(--line); border-radius: 100px; padding: 7px 14px; }
+[data-template="editorial"] .pill .g { color: var(--accent); }
+[data-template="editorial"] .cta { display: inline-flex; align-items: center; gap: 8px; background: var(--ink); color: var(--bg); border: none; font-size: 14.5px; font-weight: 700; padding: 13px 22px; border-radius: 100px; }
+[data-template="editorial"] .hairline { position: absolute; inset-block-end: 64px; inset-inline: 24px; height: 1px; background: var(--line); z-index: 2; }
+[data-template="editorial"] .scrollhint { position: absolute; inset-block-end: 30px; inset-inline: 0; text-align: center; z-index: 2; font-size: 11px; color: var(--soft); letter-spacing: 0.1em; animation: bob 2s infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0); opacity: 0.6; } 50% { transform: translateY(5px); opacity: 1; } }
+[data-template="editorial"] .take { position: fixed; inset: 0; z-index: 90; max-width: 520px; margin: 0 auto; background: var(--bg); transform: translateY(101%); transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1); overflow: auto; }
+[data-template="editorial"] .take.on { transform: translateY(0); }
+[data-template="editorial"] .tpad { padding: 4px 24px 46px; }
+
+/* ===================== WARM ===================== */
+[data-template="warm"] { font-weight: 400; }
+[data-template="warm"] .w-top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 16px 16px 12px; max-width: 520px; margin: 0 auto; }
+[data-template="warm"] .menu-head { margin-bottom: 12px; }
+[data-template="warm"] .w-brand { font-size: 20px; font-weight: 700; }
+[data-template="warm"] .w-pills { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+[data-template="warm"] .w-pills::-webkit-scrollbar { display: none; }
+[data-template="warm"] .w-pill { flex: 0 0 auto; background: var(--panel); color: var(--soft); border: 1px solid var(--line); padding: 8px 16px; border-radius: 100px; font-size: 14px; white-space: nowrap; }
+[data-template="warm"] .w-pill.on { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+[data-template="warm"] .w-feed { max-width: 520px; margin: 0 auto; padding: 12px 16px 60px; display: flex; flex-direction: column; gap: 16px; }
+[data-template="warm"] .w-card { display: flex; gap: 14px; align-items: stretch; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; text-align: start; color: inherit; }
+[data-template="warm"] .w-card.na { opacity: 0.55; }
+[data-template="warm"] .w-card-img { position: relative; width: 96px; height: 96px; border-radius: 16px; overflow: hidden; flex: 0 0 auto; }
+[data-template="warm"] .w-card-body h3 { margin: 2px 0 6px; font-size: 18px; font-weight: 700; }
+[data-template="warm"] .w-card-body p { margin: 0 0 8px; font-size: 13px; color: var(--soft); line-height: 1.7; }
+[data-template="warm"] .w-meta { display: flex; gap: 10px; font-size: 13px; color: var(--soft); }
+[data-template="warm"] .w-na { color: var(--accent); }
+
+/* ===================== SCANDI ===================== */
+[data-template="scandi"] .s-top { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); padding: 18px 18px 0; max-width: 720px; margin: 0 auto; }
+[data-template="scandi"] .menu-head { margin-bottom: 14px; }
+[data-template="scandi"] .s-brand { font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
+[data-template="scandi"] .s-tabs { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
+[data-template="scandi"] .s-tabs::-webkit-scrollbar { display: none; }
+[data-template="scandi"] .s-tab { background: none; border: none; padding: 0 0 14px; font-size: 15px; color: var(--soft); white-space: nowrap; border-bottom: 2px solid transparent; }
+[data-template="scandi"] .s-tab.on { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+[data-template="scandi"] .s-grid { max-width: 720px; margin: 0 auto; padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+[data-template="scandi"] .s-card { text-align: start; background: none; border: none; color: inherit; padding: 0; }
+[data-template="scandi"] .s-card.na { opacity: 0.55; }
+[data-template="scandi"] .s-card-img { position: relative; width: 100%; aspect-ratio: 1 / 1; border-radius: var(--radius); overflow: hidden; background: var(--panel); margin-bottom: 10px; }
+[data-template="scandi"] .s-card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+[data-template="scandi"] .s-cal { font-size: 13px; color: var(--soft); }
+[data-template="scandi"] .s-na { display: block; font-size: 13px; color: var(--accent); margin-top: 2px; }
+
+/* ===================== RESPONSIVE (md/lg) ===================== */
+/* Phone-first above; here we cap width + widen grids so tablet/desktop aren't stretched phones. */
+
+/* Shared detail body scales up on larger viewports. */
+@media (min-width: 768px) {
+  .detail .detail-title { font-size: 36px; }
+  .sheet { max-width: 640px; padding-inline: 32px; }
+}
+
+/* SCANDI — widen the grid: 2 → 3 (md) → 4 (lg) columns, wider container. */
+@media (min-width: 768px) {
+  [data-template="scandi"] .s-top { max-width: 980px; }
+  [data-template="scandi"] .s-grid { max-width: 980px; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+}
+@media (min-width: 1024px) {
+  [data-template="scandi"] .s-top { max-width: 1120px; }
+  [data-template="scandi"] .s-grid { max-width: 1120px; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+}
+
+/* WARM — single column phone feed → 2-col card grid on md+, wider container. */
+@media (min-width: 768px) {
+  [data-template="warm"] .w-top { max-width: 900px; }
+  [data-template="warm"] .w-feed {
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  [data-template="warm"] .w-card-img { width: 120px; height: 120px; }
+}
+
+/* EDITORIAL — stays immersive/full-bleed; widen the centred column slightly on large screens
+   (the rest of the viewport shows --bg, which is intentional letterboxing). */
+@media (min-width: 1024px) {
+  [data-template="editorial"] .top,
+  [data-template="editorial"] .feed,
+  [data-template="editorial"] .take { max-width: 600px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-root *, .fs *, .sheet * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>منوی کافه — اتود ۳ (نمایشی و تمام‌قاب)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ===== Étude 3 — Editorial / Immersive =====
+     palette: near-black, warm off-white type, thin gold hairline accent */
+  :root{
+    --bg:#0E0C0B; --ink:#F3ECDF; --soft:#A89C8B; --gold:#C9A24B; --panel:#171311; --line:rgba(243,236,223,.14);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0; background:var(--bg)}
+  body{font-family:"Vazirmatn",Tahoma,system-ui,sans-serif; color:var(--ink); overscroll-behavior-y:none}
+  .wrap{max-width:520px; margin:0 auto; position:relative}
+
+  /* floating top bar */
+  .top{position:fixed; top:0; inset-inline:0; z-index:40; max-width:520px; margin:0 auto;
+       padding:16px 16px 26px; background:linear-gradient(to bottom, rgba(14,12,11,.92), rgba(14,12,11,0))}
+  .brand{display:flex; align-items:baseline; gap:8px; padding:0 4px 12px}
+  .brand .n{font-size:19px; font-weight:700; letter-spacing:.04em}
+  .brand .s{font-size:11px; color:var(--soft); letter-spacing:.16em}
+  .chips{display:flex; gap:8px; overflow-x:auto; scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:0 0 auto; background:rgba(243,236,223,.08); color:var(--soft); border:1px solid var(--line);
+        padding:8px 15px; border-radius:100px; font-size:13.5px; font-weight:500; white-space:nowrap; cursor:pointer; transition:.2s}
+  .chip[aria-current="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink); font-weight:600}
+
+  /* snap feed */
+  .feed{height:100vh; overflow-y:auto; scroll-snap-type:y mandatory; scrollbar-width:none}
+  .feed::-webkit-scrollbar{display:none}
+  .slideItem{height:100vh; scroll-snap-align:start; position:relative; display:flex; align-items:flex-end; overflow:hidden}
+  .slideItem .bgimg{position:absolute; inset:0; background-size:cover; background-position:center}
+  .slideItem .bgimg img{width:100%; height:100%; object-fit:cover; display:block}
+  .scrim{position:absolute; inset:0; background:linear-gradient(to top, rgba(8,6,5,.92) 6%, rgba(8,6,5,.35) 40%, rgba(8,6,5,.15) 70%, rgba(8,6,5,.45) 100%)}
+  .num{position:absolute; inset-block-start:96px; inset-inline-end:18px; font-size:84px; font-weight:900;
+       color:rgba(243,236,223,.10); line-height:.8; letter-spacing:-.04em}
+  .meta{position:relative; z-index:2; padding:0 24px 92px; width:100%}
+  .cat-eyebrow{font-size:12px; letter-spacing:.2em; color:var(--gold); margin-bottom:10px}
+  .meta h2{font-size:40px; font-weight:900; margin:0 0 12px; line-height:1.05; letter-spacing:-.01em}
+  .meta .ing{font-size:14px; color:var(--soft); line-height:1.8; max-width:88%; margin:0 0 16px}
+  .rowmeta{display:flex; align-items:center; gap:14px; margin-bottom:18px}
+  .pill{display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600;
+        border:1px solid var(--line); border-radius:100px; padding:7px 14px}
+  .pill .g{color:var(--gold)}
+  .cta{display:inline-flex; align-items:center; gap:8px; background:var(--ink); color:var(--bg);
+       border:none; font-family:inherit; font-size:14.5px; font-weight:700; padding:13px 22px;
+       border-radius:100px; cursor:pointer}
+  .hairline{position:absolute; inset-block-end:64px; inset-inline:24px; height:1px; background:var(--line); z-index:2}
+  .scrollhint{position:absolute; inset-block-end:30px; inset-inline:0; text-align:center; z-index:2;
+              font-size:11px; color:var(--soft); letter-spacing:.1em; animation:bob 2s infinite}
+  @keyframes bob{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(5px);opacity:1}}
+
+  /* takeover detail */
+  .take{position:fixed; inset:0; z-index:90; max-width:520px; margin:0 auto; background:var(--bg);
+        transform:translateY(101%); transition:transform .35s cubic-bezier(.22,1,.36,1); overflow:auto}
+  .take.on{transform:translateY(0)}
+  .tbar{position:sticky; top:0; z-index:6; display:flex; justify-content:flex-start; padding:14px;
+        background:linear-gradient(to bottom, rgba(14,12,11,.85), transparent)}
+  .tclose{background:rgba(243,236,223,.12); border:none; color:var(--ink); width:40px; height:40px;
+          border-radius:50%; font-size:18px; cursor:pointer}
+  .tpad{padding:0 24px 46px; margin-top:-58px}
+  .tpad h1{font-size:33px; font-weight:900; margin:22px 0 14px; letter-spacing:-.01em}
+  .badges{display:flex; gap:10px; margin:0 0 26px}
+  .badge{font-size:13px; font-weight:600; padding:8px 14px; border-radius:100px; border:1px solid var(--line); color:var(--ink)}
+  .badge .g{color:var(--gold)}
+  .lbl{font-size:12px; letter-spacing:.16em; color:var(--gold); margin:0 0 14px}
+  .ings{margin:0; padding:0; list-style:none}
+  .ings li{padding:15px 0; font-size:16px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:center}
+  .ings li span.idx{color:var(--soft); font-size:13px; min-width:22px}
+
+  /* carousel */
+  .car{position:relative; border-radius:18px; overflow:hidden; background:var(--panel); aspect-ratio:4/5; touch-action:pan-y}
+  .track{display:flex; height:100%; will-change:transform}
+  .slide{flex:0 0 100%; height:100%; position:relative}
+  .slide img{width:100%; height:100%; object-fit:cover; display:block}
+  .slide-fallback{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700}
+  .dots{position:absolute; inset-block-end:14px; inset-inline:0; display:flex; gap:6px; justify-content:center; z-index:3}
+  .pd{width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.5); transition:.2s}
+  .pd.on{width:20px; border-radius:4px; background:var(--gold)}
+  .fs-btn{position:absolute; inset-block-start:12px; inset-inline-start:12px; z-index:3; background:rgba(14,12,11,.6);
+          border:1px solid var(--line); color:#fff; width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:15px}
+
+  /* fullscreen */
+  .fs{position:fixed; inset:0; z-index:130; background:#000; display:none}
+  .fs.on{display:block}
+  .fs .track{height:100%}
+  .fs .slide{display:flex; align-items:center; justify-content:center}
+  .fs .slide img{width:100%; height:100%; object-fit:contain}
+  .fs-close{position:absolute; inset-block-start:14px; inset-inline-start:14px; z-index:5; background:rgba(255,255,255,.14);
+            color:#fff; border:none; width:42px; height:42px; border-radius:50%; font-size:20px; cursor:pointer}
+  .fs-count{position:absolute; inset-block-start:20px; inset-inline-end:18px; z-index:5; color:#fff; font-size:14px; opacity:.85}
+  .fs .dots{inset-block-end:22px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><span class="n">آتلیهٔ قهوه</span><span class="s">EST · ۱۴۰۳</span></div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="feed" id="feed"></div>
+</div>
+
+<div class="take" id="take">
+  <div class="tbar"><button class="tclose" id="tclose" aria-label="بستن">⌄</button></div>
+  <div class="tpad" id="tbody"></div>
+</div>
+
+<div class="fs" id="fs">
+  <button class="fs-close" id="fsClose" aria-label="بستن">✕</button>
+  <div class="fs-count" id="fsCount"></div>
+  <div class="track" id="fsTrack"></div>
+  <div class="dots" id="fsDots"></div>
+</div>
+
+<script>
+const fa = n => String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+const IMG = {
+  11:['1568713852733-56590b197f4f','1509042239860-f550ce710b93','1511920170033-f8396924c348'],
+  21:['1559496417-e7f25cb247f3','1509042239860-f550ce710b93','1568713852733-56590b197f4f'],
+  31:['1512568400610-62da28bc8a13','1541167760496-1628856ab772','1556742526-795a8eac090e'],
+  41:['1553962311-62f2471b159d','1556742526-795a8eac090e','1511920170033-f8396924c348'],
+  51:['1577805947697-89e18249d767','1509042239860-f550ce710b93','1602351447937-745cb720612f'],
+  61:['1461023058943-07fcbe16d735','1549652127-2e5e59e86a7a','1533007716222-4b465613a984'],
+  71:['1517701550927-30cf4ba1dba5','1549652127-2e5e59e86a7a','1447933601403-0c6688de566e'],
+  81:['1592663527359-cf6642f54cff','1533007716222-4b465613a984','1568713852733-56590b197f4f'],
+  91:['1717603545758-88cc454db69b','1704079698754-5e621edb610b','1495474472287-4d71bcdd2085'],
+  101:['1506619216599-9d16d0903dfd','1610632380989-680fe40816c6','1495474472287-4d71bcdd2085'],
+  111:['1610632380989-680fe40816c6','1506619216599-9d16d0903dfd','1447933601403-0c6688de566e'],
+  121:['1572490122747-3968b75cc699','1553787499-6f9133860278','1577805947697-89e18249d767'],
+  131:['1583024012457-b6de05b7003a','1553787499-6f9133860278','1621303837174-89787a7d4729'],
+  141:['1623334044303-241021148842','1556742526-795a8eac090e','1495474472287-4d71bcdd2085'],
+  151:['1588195538326-c5b1e9f80a1b','1621303837174-89787a7d4729','1563729784474-d77dbb933a9e'],
+  161:['1602351447937-745cb720612f','1563729784474-d77dbb933a9e','1577805947697-89e18249d767'],
+};
+const U = (id,w,h) => `https://images.unsplash.com/photo-${id}?w=${w||800}&h=${h||1100}&q=70&auto=format&fit=crop`;
+const img = (tags, base) => (IMG[base]||[]).map(id => U(id, 800, 1100));
+const MENU = [
+  { id:'hot', name:'قهوهٔ گرم', items:[
+    {id:'espresso', name:'اسپرسو', kcal:5,  color:'#3b2415', ing:['دانهٔ آرابیکا','آب'], imgs:img('espresso,coffee',11)},
+    {id:'americano',name:'آمریکانو', kcal:10, color:'#4a2e1c', ing:['شات اسپرسو','آب داغ'], imgs:img('americano,coffee',21)},
+    {id:'cappuccino',name:'کاپوچینو', kcal:120,color:'#8a5a36', ing:['اسپرسو','شیر بخارپز','فوم شیر'], imgs:img('cappuccino,coffee',31)},
+    {id:'latte', name:'لاته', kcal:150, color:'#b07d4f', ing:['اسپرسو','شیر بخارپز','کمی فوم'], imgs:img('latte,coffee',41)},
+    {id:'mocha', name:'موکا', kcal:290, color:'#5a3722', ing:['اسپرسو','شیر','سس شکلات','خامه'], imgs:img('mocha,chocolate,coffee',51)},
+  ]},
+  { id:'cold', name:'قهوهٔ سرد', items:[
+    {id:'icelatte', name:'آیس‌لاته', kcal:130, color:'#c89a6a', ing:['اسپرسو','شیر سرد','یخ'], imgs:img('iced,latte,coffee',61)},
+    {id:'coldbrew', name:'کلد برو', kcal:15, color:'#2f1d12', ing:['قهوهٔ دم‌سرد ۱۸ ساعته','آب','یخ'], imgs:img('coldbrew,coffee',71)},
+    {id:'affogato', name:'آفوگاتو', kcal:240, color:'#6b4429', ing:['بستنی وانیل','شات اسپرسو'], imgs:img('affogato,icecream,coffee',81)},
+  ]},
+  { id:'tea', name:'دمنوش و چای', items:[
+    {id:'matcha', name:'ماچا لاته', kcal:140, color:'#6f8f4e', ing:['پودر ماچا','شیر بخارپز','کمی شکر'], imgs:img('matcha,latte',91)},
+    {id:'blacktea',name:'چای سیاه', kcal:2, color:'#7a4a2b', ing:['چای سیاه دم‌کشیده','آب'], imgs:img('blacktea,tea',101)},
+    {id:'masala', name:'چای ماسالا', kcal:160, color:'#9c6b3f', ing:['چای سیاه','شیر','هل','دارچین','زنجبیل'], imgs:img('chai,tea,spice',111)},
+  ]},
+  { id:'shake', name:'شیک و اسموتی', items:[
+    {id:'chocoshake', name:'شیک شکلات', kcal:420, color:'#4e2f1d', ing:['شیر','بستنی شکلاتی','سس شکلات'], imgs:img('chocolate,milkshake',121)},
+    {id:'strawsmoothie', name:'اسموتی توت‌فرنگی', kcal:180, color:'#c2596b', ing:['توت‌فرنگی تازه','ماست','عسل'], imgs:img('strawberry,smoothie',131)},
+  ]},
+  { id:'bakery', name:'کیک و دسر', items:[
+    {id:'croissant', name:'کروسان کره‌ای', kcal:270, color:'#caa15e', ing:['آرد','کرهٔ تازه','مخمر','نمک'], imgs:img('croissant,bakery',141)},
+    {id:'cheesecake', name:'چیزکیک', kcal:350, color:'#e4cf9e', ing:['پنیر خامه‌ای','بیسکویت','خامه'], imgs:img('cheesecake,dessert',151)},
+    {id:'brownie', name:'براونی', kcal:330, color:'#3d2417', ing:['شکلات تلخ','کره','تخم‌مرغ','آرد'], imgs:img('brownie,chocolate',161)},
+  ]},
+];
+function tint(hex){return `linear-gradient(150deg, ${hex} 0%, ${shade(hex,-30)} 100%)`}
+function shade(hex,p){let n=parseInt(hex.slice(1),16),r=(n>>16)+p,g=(n>>8&255)+p,b=(n&255)+p;
+  const c=v=>Math.max(0,Math.min(255,v));return '#'+(c(r)<<16|c(g)<<8|c(b)).toString(16).padStart(6,'0')}
+
+const chipsEl=document.getElementById('chips'), feedEl=document.getElementById('feed');
+let current=0;
+MENU.forEach((cat,ci)=>{
+  const c=document.createElement('button'); c.className='chip'; c.textContent=cat.name;
+  if(ci===0)c.setAttribute('aria-current','true');
+  c.onclick=()=>{current=ci; [...chipsEl.children].forEach((x,i)=>x.setAttribute('aria-current',i===ci?'true':'false'));
+    c.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'}); renderFeed()};
+  chipsEl.appendChild(c);
+});
+function renderFeed(){
+  feedEl.innerHTML=''; feedEl.scrollTop=0;
+  MENU[current].items.forEach((it,i)=>{
+    const sec=document.createElement('section'); sec.className='slideItem';
+    sec.innerHTML=`
+      <div class="bgimg" style="background:${tint(it.color)}">
+        <img src="${it.imgs[0]}" alt="${it.name}" loading="lazy" onerror="this.style.display='none'">
+      </div>
+      <div class="scrim"></div>
+      <div class="num">${fa(i+1).padStart ? fa(String(i+1).padStart(2,'0')) : fa(i+1)}</div>
+      <div class="meta">
+        <div class="cat-eyebrow">${MENU[current].name}</div>
+        <h2>${it.name}</h2>
+        <p class="ing">${it.ing.join(' · ')}</p>
+        <div class="rowmeta"><span class="pill"><span class="g">●</span> ${fa(it.kcal)} کالری</span>
+          <span class="pill">${fa(it.imgs.length)} تصویر</span></div>
+        <button class="cta">مشاهدهٔ جزئیات ←</button>
+      </div>
+      <div class="hairline"></div>
+      ${i===0?'<div class="scrollhint">برای دیدن موارد بعدی بکشید ↑</div>':''}`;
+    sec.querySelector('.cta').onclick=()=>openTake(it);
+    sec.querySelector('.bgimg').onclick=()=>openTake(it);
+    feedEl.appendChild(sec);
+  });
+}
+renderFeed();
+
+/* carousel factory */
+function buildCarousel(container, images, color, label, onTap){
+  let idx=0,w=0,sx=0,d=0,drag=false;
+  const track=document.createElement('div'); track.className='track'; track.dir='ltr';
+  images.forEach(src=>{const s=document.createElement('div'); s.className='slide';
+    s.innerHTML=`<div class="slide-fallback" style="background:${tint(color)}">${label}</div>`;
+    const im=document.createElement('img'); im.src=src; im.alt=label; im.loading='lazy'; im.onerror=()=>im.remove();
+    s.appendChild(im); track.appendChild(s)});
+  container.appendChild(track);
+  const dots=document.createElement('div'); dots.className='dots';
+  images.forEach((_,i)=>{const p=document.createElement('span'); p.className='pd'+(i===0?' on':''); dots.appendChild(p)});
+  container.appendChild(dots);
+  const fb=document.createElement('button'); fb.className='fs-btn'; fb.innerHTML='⛶';
+  fb.onclick=e=>{e.stopPropagation(); onTap(images,color,label,idx)}; container.appendChild(fb);
+  const measure=()=>w=container.clientWidth;
+  const go=i=>{idx=Math.max(0,Math.min(images.length-1,i));
+    track.style.transition='transform .3s cubic-bezier(.22,1,.36,1)'; track.style.transform=`translateX(${-idx*w}px)`;
+    [...dots.children].forEach((p,k)=>p.classList.toggle('on',k===idx))};
+  measure();
+  container.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;d=0;track.style.transition='none';container.setPointerCapture(e.pointerId)});
+  container.addEventListener('pointermove',e=>{if(!drag)return;d=e.clientX-sx;track.style.transform=`translateX(${-idx*w+d}px)`});
+  const end=()=>{if(!drag)return;drag=false; if(Math.abs(d)>w*0.18) go(idx+(d<0?1:-1)); else go(idx)};
+  container.addEventListener('pointerup',end); container.addEventListener('pointercancel',end);
+  container.addEventListener('click',e=>{if(Math.abs(d)<6 && !e.target.classList.contains('fs-btn')) onTap(images,color,label,idx)});
+}
+
+/* takeover detail */
+const take=document.getElementById('take'), tbody=document.getElementById('tbody');
+function openTake(it){
+  tbody.innerHTML=`
+    <div class="car" id="detailCar"></div>
+    <h1>${it.name}</h1>
+    <div class="badges"><span class="badge"><span class="g">●</span> ${fa(it.kcal)} کالری</span><span class="badge">${fa(it.imgs.length)} تصویر</span></div>
+    <p class="lbl">ت ر ک ی ب ا ت</p>
+    <ul class="ings">${it.ing.map((g,i)=>`<li><span class="idx">${fa(String(i+1).padStart(2,'0'))}</span>${g}</li>`).join('')}</ul>`;
+  buildCarousel(document.getElementById('detailCar'), it.imgs, it.color, it.name, openFs);
+  take.classList.add('on'); document.body.style.overflow='hidden';
+}
+document.getElementById('tclose').onclick=()=>{take.classList.remove('on'); document.body.style.overflow=''};
+
+/* fullscreen */
+const fs=document.getElementById('fs'), fsTrack=document.getElementById('fsTrack'),
+      fsDots=document.getElementById('fsDots'), fsCount=document.getElementById('fsCount');
+let fsIdx=0,fsW=0,fsImgs=[];
+function openFs(images,color,label,start){
+  fsImgs=images; fsIdx=start||0; fsTrack.innerHTML=''; fsDots.innerHTML='';
+  images.forEach(src=>{const s=document.createElement('div'); s.className='slide';
+    s.innerHTML=`<div class="slide-fallback" style="background:${tint(color)}">${label}</div>`;
+    const im=document.createElement('img'); im.src=src; im.alt=label; im.onerror=()=>im.remove(); s.appendChild(im); fsTrack.appendChild(s);
+    const d=document.createElement('span'); d.className='pd'; fsDots.appendChild(d)});
+  fs.classList.add('on'); fsW=fs.clientWidth; place();
+}
+function place(){fsTrack.style.transition='transform .3s cubic-bezier(.22,1,.36,1)';
+  fsTrack.style.transform=`translateX(${-fsIdx*fsW}px)`; fsCount.textContent=`${fa(fsIdx+1)} / ${fa(fsImgs.length)}`;
+  [...fsDots.children].forEach((d,k)=>d.classList.toggle('on',k===fsIdx))}
+(function(){let sx=0,d=0,drag=false; fsTrack.style.display='flex'; fsTrack.style.height='100%';
+  fs.addEventListener('pointerdown',e=>{drag=true;sx=e.clientX;d=0;fsTrack.style.transition='none'});
+  fs.addEventListener('pointermove',e=>{if(!drag)return;d=e.clientX-sx;fsTrack.style.transform=`translateX(${-fsIdx*fsW+d}px)`});
+  const e2=()=>{if(!drag)return;drag=false; if(Math.abs(d)>fsW*0.15){fsIdx=Math.max(0,Math.min(fsImgs.length-1,fsIdx+(d<0?1:-1)))} place()};
+  fs.addEventListener('pointerup',e2); fs.addEventListener('pointercancel',e2)})();
+document.getElementById('fsClose').onclick=()=>fs.classList.remove('on');
+window.addEventListener('resize',()=>{if(fs.classList.contains('on')){fsW=fs.clientWidth;fsTrack.style.transition='none';place()}});
+</script>
+</body>
+</html>

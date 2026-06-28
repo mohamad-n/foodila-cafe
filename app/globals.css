@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Two token namespaces (kept separate — see styling-rtl rule + design-system skill):
+ *
+ * 1) shadcn semantic tokens — HSL channel triples consumed as hsl(var(--token)).
+ *    The DEFAULT set below in :root is the editorial DARK theme and powers every
+ *    shadcn primitive on every surface (admin + public). Admin surfaces may switch
+ *    to light/sepia via next-themes; those overrides are scoped to `.admin-root`
+ *    (see lib/themes.ts + the admin layouts) so the public menu is never affected.
+ *
+ * 2) Legacy Étude tokens (--color-bg/ink/accent/hairline) — still referenced by the
+ *    not-yet-migrated admin/auth markup as Tailwind `bg/ink/hairline` aliases; retired
+ *    as those surfaces move onto shadcn primitives. The public menu's own per-café
+ *    template tokens (--bg/--ink/…) live in components/menu/menu.css via ThemeScope.
+ */
+:root {
+  /* shadcn semantic tokens — default (dark editorial) */
+  --background: 0 0% 4%;
+  --foreground: 43 33% 93%;
+  --card: 0 0% 7%;
+  --card-foreground: 43 33% 93%;
+  --popover: 0 0% 7%;
+  --popover-foreground: 43 33% 93%;
+  --primary: 40 47% 60%; /* muted gold — brand */
+  --primary-foreground: 0 0% 6%;
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 43 33% 93%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 43 10% 64%;
+  --accent: 0 0% 18%;
+  --accent-foreground: 43 33% 93%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 18%;
+  --input: 0 0% 22%;
+  --ring: 40 47% 60%;
+  --radius: 0.625rem;
+
+  /* legacy Étude aliases (admin/auth transitional) */
+  --color-bg: #0a0a0a;
+  --color-ink: #f5f1e8;
+  --color-accent: #c9a96a;
+  --color-hairline: rgba(245, 241, 232, 0.12);
+}
+
+/*
+ * Admin theme overrides (extensible) — scoped to `.admin-root` so they never reach the
+ * public menu. Adding a theme = one entry in lib/themes.ts + one block here. Each block
+ * restates the full shadcn token set AND the legacy `--color-*` aliases (a bridge for the
+ * not-yet-migrated admin markup; dropped once those surfaces move to shadcn primitives).
+ */
+html[data-theme="dark"] .admin-root {
+  --background: 0 0% 4%;
+  --foreground: 43 33% 93%;
+  --card: 0 0% 7%;
+  --card-foreground: 43 33% 93%;
+  --popover: 0 0% 7%;
+  --popover-foreground: 43 33% 93%;
+  --primary: 40 47% 60%;
+  --primary-foreground: 0 0% 6%;
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 43 33% 93%;
+  --muted: 0 0% 14%;
+  --muted-foreground: 43 10% 64%;
+  --accent: 0 0% 18%;
+  --accent-foreground: 43 33% 93%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 18%;
+  --input: 0 0% 22%;
+  --ring: 40 47% 60%;
+  --color-bg: #0a0a0a;
+  --color-ink: #f5f1e8;
+  --color-hairline: rgba(245, 241, 232, 0.12);
+  color-scheme: dark;
+}
+
+html[data-theme="light"] .admin-root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 40 45% 42%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 12% 95%;
+  --secondary-foreground: 0 0% 12%;
+  --muted: 40 12% 95%;
+  --muted-foreground: 0 0% 40%;
+  --accent: 40 16% 92%;
+  --accent-foreground: 0 0% 12%;
+  --destructive: 0 72% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 40 13% 87%;
+  --input: 40 13% 85%;
+  --ring: 40 45% 42%;
+  --color-bg: #ffffff;
+  --color-ink: #1a1a1a;
+  --color-hairline: rgba(0, 0, 0, 0.12);
+  color-scheme: light;
+}
+
+html[data-theme="sepia"] .admin-root {
+  --background: 39 38% 91%;
+  --foreground: 28 30% 17%;
+  --card: 39 44% 95%;
+  --card-foreground: 28 30% 17%;
+  --popover: 39 44% 95%;
+  --popover-foreground: 28 30% 17%;
+  --primary: 26 55% 36%;
+  --primary-foreground: 39 44% 96%;
+  --secondary: 36 28% 84%;
+  --secondary-foreground: 28 30% 20%;
+  --muted: 36 26% 85%;
+  --muted-foreground: 28 16% 40%;
+  --accent: 34 30% 81%;
+  --accent-foreground: 28 30% 20%;
+  --destructive: 8 60% 40%;
+  --destructive-foreground: 39 44% 96%;
+  --border: 34 24% 77%;
+  --input: 34 24% 75%;
+  --ring: 26 55% 36%;
+  --color-bg: #f1e7d3;
+  --color-ink: #2c2118;
+  --color-hairline: rgba(44, 33, 24, 0.18);
+  color-scheme: light;
+}
+
+html {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Respect reduced-motion: disable scroll-snap + animations. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

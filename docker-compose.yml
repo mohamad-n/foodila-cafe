@@ -1,0 +1,85 @@
+# Local development infrastructure. `next` runs on the host (`pnpm dev`) in dev;
+# this brings up the backing services it talks to.
+#
+#   docker compose up -d
+#
+# - postgres  : the single shared database (tenant data separated by cafeId)
+# - minio     : S3-compatible object storage (per-café key prefixes) + web console
+# - imgproxy  : on-the-fly AVIF/WebP/resize in front of MinIO
+#
+# Credentials below match .env.example for a frictionless local boot. Override via env in prod.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cafe
+      POSTGRES_PASSWORD: cafe
+      POSTGRES_DB: cafe_menu
+    ports:
+      - "5455:5432" # host 5455 (chosen clear of many local postgres instances on 5432-5447)
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cafe -d cafe_menu"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9410:9000" # S3 API (host 9410)
+      - "9411:9001" # web console (host 9411)
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      # minio ships curl; hit its readiness endpoint (no alias needed).
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: ensure the bucket exists, then exits.
+  createbuckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb --ignore-existing local/cafe-menu &&
+      echo 'bucket cafe-menu ready';
+      "
+
+  imgproxy:
+    image: darthsim/imgproxy:latest
+    restart: unless-stopped
+    depends_on:
+      - minio
+    environment:
+      # Signed-URL keys (hex). Dev defaults — regenerate for prod (`openssl rand -hex 32`).
+      IMGPROXY_KEY: "6465765f696d6770726f78795f6b65795f63686d65"
+      IMGPROXY_SALT: "6465765f696d6770726f78795f73616c745f63686d65"
+      IMGPROXY_USE_S3: "true"
+      IMGPROXY_S3_ENDPOINT: "http://minio:9000"
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      IMGPROXY_S3_REGION: us-east-1
+      IMGPROXY_ALLOWED_SOURCES: "s3://"
+      # Serve modern formats based on the browser's Accept header.
+      IMGPROXY_ENABLE_WEBP_DETECTION: "true"
+      IMGPROXY_ENABLE_AVIF_DETECTION: "true"
+    ports:
+      - "8810:8080" # host 8810
+
+volumes:
+  postgres-data:
+  minio-data:

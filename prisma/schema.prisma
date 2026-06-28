@@ -1,0 +1,172 @@
+// Café Menu SaaS — Prisma schema.
+// PostgreSQL, single shared schema, multi-tenant by `cafeId`.
+// Conventions (see .claude/skills/prisma-data-model): cuid() PKs; every tenant-owned model carries
+// `cafeId` + a cafeId-leading index; i18n text as JSONB { fa, en? }; soft toggles over hard deletes.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Connection URL lives in prisma.config.ts (CLI) + the driver adapter in lib/db.ts (runtime).
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum PlatformRole {
+  SUPER_ADMIN // absence = normal user
+}
+
+enum CafeRole {
+  OWNER
+  ADMIN
+  STAFF
+}
+
+enum CafeStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum MenuTemplate {
+  WARM
+  SCANDI
+  EDITORIAL // default public-menu layout (see menu-templates skill)
+}
+
+// ---------------------------------------------------------------------------
+// Non-tenant models (accessed via the base client, lib/db.ts)
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  passwordHash String? // scrypt hash (lib/password.ts); null = no credentials login
+  platformRole PlatformRole? // set only for platform operators
+  memberships  Membership[]
+  auditLogs    AuditLog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+// Platform-level audit trail (NOT tenant-scoped — records cross-tenant operator actions).
+// Accessed via the base client by super-admins only; never via getTenantPrisma.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  action     String // e.g. "cafe.create", "user.promote", "impersonation.start"
+  cafeId     String? // subject café, when applicable
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([cafeId])
+}
+
+model Plan {
+  id        String   @id @default(cuid())
+  name      String
+  // limits (cafes/items/images) + price — filled when billing lands (out of MVP scope)
+  cafes     Cafe[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cafe {
+  id            String       @id @default(cuid())
+  slug          String       @unique // used in (public)/[cafeSlug]
+  name          String
+  status        CafeStatus   @default(ACTIVE)
+  defaultLocale String       @default("fa")
+  template      MenuTemplate @default(EDITORIAL) // which layout the café's menu renders
+  themeTokens   Json         @default("{}") // per-café CSS-variable overrides (palette/type/radius)
+  logoKey       String? // MinIO object key for the logo (cafes/{id}/branding/…); null = no logo
+  showCalories  Boolean      @default(true) // show item calories on the public menu
+  showPrice     Boolean      @default(true) // show item price on the public menu
+  planId        String?
+  plan          Plan?        @relation(fields: [planId], references: [id])
+  memberships   Membership[]
+  categories    Category[]
+  items         Item[]
+  images        ItemImage[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Tenant-owned models (accessed ONLY via getTenantPrisma — lib/tenant.ts)
+// Each carries `cafeId` + a cafeId-leading index. Keep TENANT_MODELS in sync.
+// ---------------------------------------------------------------------------
+
+model Membership {
+  id        String   @id @default(cuid())
+  cafeId    String
+  cafe      Cafe     @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      CafeRole @default(STAFF)
+  createdAt DateTime @default(now())
+
+  @@unique([cafeId, userId])
+  @@index([cafeId])
+  @@index([userId])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  cafeId    String
+  cafe      Cafe     @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  name      Json // { fa, en? }
+  subtitle  Json? // { fa, en? } — optional category tagline (e.g. «بر پایه قهوه»)
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  items     Item[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cafeId, sortOrder])
+}
+
+model Item {
+  id          String      @id @default(cuid())
+  cafeId      String
+  cafe        Cafe        @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name        Json // { fa, en? }
+  description Json? // { fa, en? }
+  ingredients Json        @default("[]") // string[] (promote to tables only if allergen filtering lands)
+  calories    Int?
+  price       Int? // price in تومان (whole toman, no decimals); null = no price shown
+  isAvailable Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  images      ItemImage[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([cafeId, categoryId, sortOrder])
+}
+
+model ItemImage {
+  id        String   @id @default(cuid())
+  cafeId    String
+  cafe      Cafe     @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  objectKey String // MinIO key: cafes/{cafeId}/items/{itemId}/{uuid}
+  width     Int
+  height    Int
+  blurhash  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([cafeId, itemId, sortOrder])
+}

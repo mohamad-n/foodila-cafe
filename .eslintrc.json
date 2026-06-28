@@ -1,0 +1,10 @@
+{
+  "extends": ["next/core-web-vitals", "next/typescript", "prettier"],
+  "ignorePatterns": ["lib/generated/**"],
+  "overrides": [
+    {
+      "files": ["components/menu/**"],
+      "rules": { "@next/next/no-img-element": "off" }
+    }
+  ]
+}
