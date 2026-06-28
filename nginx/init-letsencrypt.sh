@@ -33,10 +33,12 @@ if [ ! -e "${CERT_DIR}/options-ssl-nginx.conf" ] || [ ! -e "${CERT_DIR}/ssl-dhpa
 fi
 
 # 1) Dummy self-signed cert so nginx can start and serve the ACME challenge over :80.
+# The certbot image's ENTRYPOINT is `certbot`, so we override it to a shell to run openssl/rm.
 echo "### Creating a temporary self-signed certificate for ${DOMAIN}…"
 mkdir -p "${LIVE}"
-docker run --rm -v "$(pwd)/${CERT_DIR}:/etc/letsencrypt" certbot/certbot \
-  sh -c "openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
+docker run --rm -v "$(pwd)/${CERT_DIR}:/etc/letsencrypt" \
+  --entrypoint sh certbot/certbot \
+  -c "openssl req -x509 -nodes -newkey rsa:2048 -days 1 \
     -keyout '/etc/letsencrypt/live/${DOMAIN}/privkey.pem' \
     -out '/etc/letsencrypt/live/${DOMAIN}/fullchain.pem' \
     -subj '/CN=${DOMAIN}'"
@@ -47,17 +49,19 @@ ${COMPOSE} up -d nginx
 
 # 3) Drop the dummy and request the real certificate via the webroot challenge.
 echo "### Deleting the temporary certificate…"
-docker run --rm -v "$(pwd)/${CERT_DIR}:/etc/letsencrypt" certbot/certbot \
-  sh -c "rm -rf /etc/letsencrypt/live/${DOMAIN} /etc/letsencrypt/archive/${DOMAIN} /etc/letsencrypt/renewal/${DOMAIN}.conf"
+docker run --rm -v "$(pwd)/${CERT_DIR}:/etc/letsencrypt" \
+  --entrypoint sh certbot/certbot \
+  -c "rm -rf /etc/letsencrypt/live/${DOMAIN} /etc/letsencrypt/archive/${DOMAIN} /etc/letsencrypt/renewal/${DOMAIN}.conf"
 
 STAGING_FLAG=""
 [ "${STAGING}" != "0" ] && STAGING_FLAG="--staging"
 
 echo "### Requesting the Let's Encrypt certificate…"
-${COMPOSE} run --rm --entrypoint "\
-  certbot certonly --webroot -w /var/www/certbot ${STAGING_FLAG} \
-    --email ${CERTBOT_EMAIL} --agree-tos --no-eff-email --force-renewal \
-    -d ${DOMAIN} -d ${CDN_HOST} -d ${S3_HOST}" certbot
+# Override the compose service's renew-loop entrypoint with plain `certbot`; the subcommand follows.
+${COMPOSE} run --rm --entrypoint certbot certbot \
+  certonly --webroot -w /var/www/certbot ${STAGING_FLAG} \
+    --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email --force-renewal \
+    -d "${DOMAIN}" -d "${CDN_HOST}" -d "${S3_HOST}"
 
 # 4) Reload nginx with the real certificate.
 echo "### Reloading nginx…"

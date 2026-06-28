@@ -855,6 +855,59 @@ public templates are responsive + `cn()`-composed while keeping their bespoke pe
   8 categories / 87 items (all priced, 72 with ingredients) / 12 normalized images, `imageFailures:0`;
   re-run idempotent (12 skipped). Temp café + its MinIO objects cleaned up. `typecheck`·`lint`·`build` green.
 
+## Production deployment & runtime config
+**Status:** ✅ done · **Skills:** nextjs-conventions, security
+- **Domain `foodila.ir`** — single-host `docker-compose.prod.yml`; **nginx is the only public service**
+  (80/443) and reverse-proxies three subdomains: apex → `app:3000`, `cdn.` → `imgproxy:8080`,
+  `s3.` → `minio:9000`. Subdomains chosen over path-routing because S3 **SigV4 signs host+path** — a path
+  rewrite would break presigned uploads. TLS via **Let's Encrypt/certbot** (one SAN cert, 6-h reload +
+  twice-daily renew). Postgres/MinIO/imgproxy are never exposed.
+- **Runtime/build** — `next.config.ts` → `output: "standalone"`; multi-stage `Dockerfile`
+  (deps → builder → lean runner, ~368 MB, boots ~93 ms). Build-time **placeholder** env satisfy
+  `prisma generate` (postinstall reads `prisma.config.ts`) and `lib/env` validation **without baking
+  secrets**; the generated client (gitignored `lib/generated`) is carried from `deps` into `builder`.
+  `generateStaticParams` tolerates an unreachable DB at image-build time (falls back to ISR).
+- **MinIO endpoint split** — `lib/storage.ts` now has a **public** client (`MINIO_ENDPOINT`, browser
+  presign URLs) and an **internal** client (`MINIO_INTERNAL_ENDPOINT`, server reads/writes — no TLS/proxy
+  round-trip). `lib/env.ts` gained `MINIO_INTERNAL_ENDPOINT` (optional, defaults to public) + `NODE_ENV`.
+- **Auto-migrate, manual-seed** — one-shot `migrate` service runs `prisma migrate deploy`; `app` waits on
+  `service_completed_successfully` (schema guaranteed before first request). Seeding stays a deliberate
+  one-time `dcp run --rm migrate pnpm db:seed`. Plus `createbuckets`, `imgproxy`, `certbot` renew loop,
+  `nginx/templates/default.conf.template` (3 TLS vhosts, 30 MB upload on `s3.`, immutable cache on `cdn.`),
+  `nginx/init-letsencrypt.sh` bootstrap.
+- **Docs/safety** — `.env.production.example`, `DEPLOY.md` (Ubuntu 22/24 runbook + **§4b coexistence**:
+  this host already runs elitera/metabase stacks, so only 80/443 must be free — everything else stays on a
+  private network), `.dockerignore`. **`.gitignore` leak fix:** `.env.production` was **not** ignored
+  before (only `.env`/`*.local`) → now all `.env.*` except the committed examples, plus `nginx/certbot/`
+  (TLS private keys). **No Redis** (single instance, in-memory rate-limit) — add when scaling out.
+- **Verified locally:** image builds + boots + serves `/` `/login` `200`; `docker compose config` valid
+  (only nginx publishes ports); gates green. TLS issuance + subdomain routing are the on-server step
+  (need real DNS + 80/443) — documented, not runnable here.
+
+## Migrations squashed to a single `0_init` baseline
+**Status:** ✅ done · **Skills:** prisma-data-model
+- The four dev migrations (`…_init`, `add_audit_log`, `add_branding_price_display`,
+  `add_category_subtitle`) collapsed into **one `0_init`** so first deploy applies a single migration.
+  Generated with `prisma migrate diff --from-empty --to-schema`. **Proven faithful three ways:** the live
+  dev DB (all 4 applied) diffs **empty** vs `schema.prisma`; the originals are pure DDL; `0_init` applies
+  cleanly to a throwaway empty DB. Local `_prisma_migrations` re-baselined to `0_init` only
+  (`migrate status` → up to date). **Safe only because no environment had the old migrations applied yet —
+  do not squash again once production is live; add timestamped migrations on top instead.**
+
+## Account settings — self-service change password
+**Status:** ✅ done · **Skills:** auth-rbac, design-system
+- New **`(account)` route group** with its own themed `admin-root` shell so **`/account` exists once** and
+  is reachable by **every** signed-in user (SUPER_ADMIN + all café roles **incl. STAFF**) — a page in both
+  admin groups would collide on the same path. "بازگشت" returns to the tier's home; linked from both admin
+  headers (café nav available to STAFF too).
+- Three-field **verification form** (current / new / confirm) — RHF + zodResolver reusing the shared
+  `TextField` + `applyActionResult`. `changePassword` Server Action is **user-scoped**: `requireUser`
+  (targets the **session** user only, never a client-supplied id) → **re-verify current password** against
+  the stored scrypt hash → re-parse the same Zod rules (min 8, new ≠ current, confirm match) → write the
+  new `hashPassword` → `writeAudit("user.password_change")`. Returns `ActionResult` (field error on a wrong
+  current password). **Replaces** the need to rotate passwords via a container command.
+- Gates green: `typecheck`·`lint`·`build` (`/account` compiles dynamic `ƒ`, no route collision).
+
 ---
 
 ## Session log
@@ -877,3 +930,6 @@ _(one line per session: date · phase · outcome)_
 - 2026-06-27 · Phase 14 (Polish) · ✅ done — RTL `end-4` close buttons; menu overlays get `role=dialog`/`aria-modal`/focus-on-open/Esc + `:focus-visible`; theme contrast + touch targets reviewed; docs synced. **EPIC 2 COMPLETE (7/7).** Final gates green; public + admin runtime smoke passed.
 - 2026-06-27 · Features (branding + price + display toggles) · ✅ done — per-café logo (`Cafe.logoKey`, café-admin settings + public header), item price (`Item.price`, تومان via `faToman`, editor + all templates), `Cafe.showCalories`/`showPrice` toggles gated at the DTO; `Category.subtitle`; migrations add_branding_price_display + add_category_subtitle; gates green.
 - 2026-06-28 · Feature (default-menu seeder) · ✅ done — in-app super-admin trigger (`lib/seed/import-menu.ts` via `getTenantPrisma`, idempotent/additive, JPEG master normalization, ingredients string→array); platform «منوی پیش‌فرض» row action (audited + revalidates); retired the `seed:menu` CLI; verified end-to-end on a fresh café; gates green.
+- 2026-06-28 · Deploy (production setup) · ✅ done — `output:standalone` + multi-stage Dockerfile, `docker-compose.prod.yml` (nginx-only public, one-shot `migrate`, certbot), nginx subdomain TLS vhosts for **foodila.ir** (app/cdn/s3), MinIO public/internal endpoint split, NODE_ENV, DEPLOY.md (Ubuntu 22/24 + host coexistence), `.gitignore` secret-leak fix; image builds + boots + compose validates; gates green.
+- 2026-06-28 · Maintenance (migration squash) · ✅ done — 4 dev migrations → single `0_init` baseline (faithful: empty-diff vs schema + clean apply to fresh DB); local `_prisma_migrations` re-baselined; don't squash again post-production.
+- 2026-06-28 · Feature (account change-password) · ✅ done — new `(account)` route group + self-service change-password (`requireUser`, current-password re-verify vs scrypt hash, audited) for super-admin + every café role (incl. STAFF); three-field verification form (RHF+zodResolver); linked from both admin headers; `/account` dynamic, no collision; gates green.
