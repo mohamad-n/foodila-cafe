@@ -1,17 +1,22 @@
 # Deployment — Ubuntu 22.04 / 24.04
 
-Single-host deployment with Docker Compose. **nginx** is the only public service and reverse-proxies
-to three internal services:
+Single-host deployment with Docker Compose. **This server already runs nginx** (for other apps), so that
+**host nginx** is the TLS-terminating reverse proxy (Plan B). The stack publishes each upstream on
+`127.0.0.1` and the host nginx proxies three hostnames to them:
 
-| Public hostname | → internal service | purpose |
-|---|---|---|
-| `foodila.ir` | `app:3000` | the Next.js app (admin + public menu) |
-| `cdn.foodila.ir` | `imgproxy:8080` | signed image transforms (image `src`s) |
-| `s3.foodila.ir` | `minio:9000` | browser **presigned uploads** (never proxied through Next) |
+| Public hostname | host nginx → | container | purpose |
+|---|---|---|---|
+| `foodila.ir` | `127.0.0.1:3100` | app | the Next.js app (admin + public menu) |
+| `cdn.foodila.ir` | `127.0.0.1:8100` | imgproxy | signed image transforms (image `src`s) |
+| `s3.foodila.ir` | `127.0.0.1:9100` | MinIO | browser **presigned uploads** (never proxied through Next) |
 
-Postgres, MinIO, and imgproxy are **not** exposed to the internet. TLS is Let's Encrypt (auto-renewing).
+Postgres, MinIO, and imgproxy bind **localhost only** — never the public interface. TLS is issued by the
+**host** certbot. Ports are `APP_HOST_PORT` / `IMGPROXY_HOST_PORT` / `S3_HOST_PORT` in `.env.production`.
 
 > Domain is **foodila.ir** (apex + `cdn.` + `s3.`). DNS is managed by your external provider.
+>
+> **No host nginx?** A fully self-contained edge (Dockerized nginx + certbot owning 80/443) is available
+> as an opt-in — see [Alternative: bundled edge](#alternative-bundled-edge-no-host-nginx) at the bottom.
 
 ---
 
@@ -57,25 +62,25 @@ sudo ufw allow 443/tcp
 sudo ufw enable
 ```
 
-## 4b. Coexisting with other stacks on the same host
+## 4b. Coexisting with the existing host nginx + other stacks
 
-This server already runs other Docker stacks (e.g. `elitera-*`, `metabase`, standalone `postgres`).
-That's fine — **this stack only publishes ports `80` and `443`** (via nginx). Its Postgres, MinIO, and
-imgproxy stay on this project's **private** Docker network and are never bound to host ports, so they
-can't collide with the existing `minio` (9000/9001), the two Postgres (5432/5433), or metabase (3000).
-Compose also scopes service names per project, so our internal `postgres`/`minio`/`app` names don't
-clash with theirs.
+This server already runs **host nginx** plus other Docker stacks (`elitera-*`, `metabase`, standalone
+`postgres`). We **reuse the host nginx** as the TLS edge rather than adding a second one. This stack:
 
-The **only** requirement is that `80`/`443` are free. Confirm before bringing up nginx:
+- publishes only **three localhost ports** — `127.0.0.1:3100` (app), `:8100` (imgproxy), `:9100` (MinIO) —
+  never the public interface;
+- keeps Postgres/MinIO/imgproxy on its **private** Docker network for inter-container traffic, with
+  per-project service names, so nothing collides with the existing `minio` (9000/9001), the two Postgres
+  (5432/5433), or metabase (3000).
+
+Confirm the three localhost ports are free (override `*_HOST_PORT` in `.env.production` if not):
 
 ```bash
-sudo ss -ltnp '( sport = :80 or sport = :443 )'
+sudo ss -ltnp '( sport = :3100 or sport = :8100 or sport = :9100 )'   # expect no output
 ```
 
-If that prints nothing, you're clear. If something is already listening (a host nginx/caddy, or another
-container), you must free those ports — this stack terminates TLS for all three `foodila.ir` hostnames
-itself and needs to own 80/443. Don't also point an existing host-level reverse proxy at the app
-container; pick one TLS terminator.
+The host nginx keeps owning `80`/`443`; in step 8 we just **add a site config** to it. Do **not** start
+the bundled Docker nginx (it's off by default; only `--profile bundled-edge` would start it).
 
 ## 5. Clone + configure
 
@@ -107,30 +112,43 @@ match the MinIO root creds (or a scoped key you create).
 dcp build
 ```
 
-## 7. Issue TLS certificates (one time)
-
-This starts datastores + nginx and obtains the Let's Encrypt SAN cert for all three hostnames:
-
-```bash
-dcp up -d postgres minio
-bash nginx/init-letsencrypt.sh          # add STAGING=1 in front to dry-run against LE staging first
-```
-
-If it succeeds you'll see *“TLS is live for foodila.ir, cdn.foodila.ir, s3.foodila.ir.”*
-
-## 8. Start the whole stack
+## 7. Start the stack (on localhost)
 
 ```bash
 dcp up -d
 ```
 
-On startup the `migrate` service runs `prisma migrate deploy` (applies pending migrations) and the
-`app` waits for it. Check everything is healthy:
+This brings up Postgres, MinIO, imgproxy, the one-shot `migrate` (runs `prisma migrate deploy`; `app`
+waits for it), and `app` — all on the three `127.0.0.1` ports. Nothing is public yet. Check health:
 
 ```bash
 dcp ps
-dcp logs -f app          # Ctrl-C to stop following
+curl -I http://127.0.0.1:3100        # app should answer (200/307)
+dcp logs -f app                      # Ctrl-C to stop following
 ```
+
+## 8. Host nginx site config + TLS (one time)
+
+Install the provided site config into the **existing** host nginx and issue certs with the host certbot:
+
+```bash
+# 1) install the reverse-proxy config (foodila.ir / cdn. / s3. → the localhost ports)
+sudo cp nginx/host/foodila.ir.conf /etc/nginx/sites-available/foodila.ir.conf
+sudo ln -s /etc/nginx/sites-available/foodila.ir.conf /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx     # serves the three names over :80
+
+# 2) issue + wire TLS (certbot rewrites the config to add :443 + an HTTP→HTTPS redirect)
+sudo apt-get install -y certbot python3-certbot-nginx     # if not already installed
+sudo certbot --nginx -d foodila.ir -d cdn.foodila.ir -d s3.foodila.ir \
+  --email "$CERTBOT_EMAIL" --agree-tos --no-eff-email --redirect
+```
+
+certbot installs a renewal timer automatically (`systemctl list-timers | grep certbot`).
+
+> **If host nginx uses `conf.d/` instead of `sites-enabled/`** (no symlink step), copy to
+> `/etc/nginx/conf.d/foodila.ir.conf` instead.
+> **If another site already defines a `$connection_upgrade` map**, delete that `map {…}` block from the
+> top of `foodila.ir.conf` (nginx allows only one per `http{}`).
 
 ## 9. Bootstrap an admin account
 
@@ -176,20 +194,23 @@ the bucket out with `mc` periodically.
 
 ```bash
 dcp ps                       # status
-dcp logs -f <service>        # tail logs (app | nginx | imgproxy | postgres | minio | certbot)
+dcp logs -f <service>        # tail logs (app | imgproxy | postgres | minio | migrate)
 dcp restart app
 dcp exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
 dcp down                     # stop (keeps volumes/data)
+sudo systemctl reload nginx  # host nginx — after editing foodila.ir.conf
 ```
 
 ## Troubleshooting
 
-- **Cert request fails** — DNS must resolve to this host and ports 80/443 must be open *before*
-  running `init-letsencrypt.sh`. Re-run with `STAGING=1` to avoid hitting LE rate limits while testing.
-- **nginx won't start (no cert)** — run step 7; nginx needs the cert under
-  `nginx/certbot/conf/live/foodila.ir/`.
+- **502 from foodila.ir** — host nginx can't reach the app. Check `curl -I http://127.0.0.1:3100` and
+  `dcp ps`; confirm `proxy_pass` ports in `foodila.ir.conf` match `*_HOST_PORT`.
+- **Cert request fails** — DNS for all three names must resolve to this host *before* `certbot --nginx`;
+  the host nginx must already serve them on `:80`. Add `--dry-run` to test without hitting LE rate limits.
+- **Uploads fail with 403 / SignatureDoesNotMatch** — the host nginx must pass `Host` **unchanged** to
+  MinIO (`proxy_set_header Host $host;`, already in `foodila.ir.conf`). Any Host/URI rewrite breaks SigV4.
 - **Uploads fail with a CORS error** — the browser PUTs to `s3.foodila.ir`. MinIO emits its own CORS
-  headers; if your provider/setup strips them, set an allowed origin on the bucket with `mc`:
+  headers; if stripped, set an allowed origin on the bucket with `mc`:
   `dcp run --rm createbuckets sh -c "mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && mc cors set local/\$MINIO_BUCKET <(echo '{...}')"`.
 - **Images don't render** — check `dcp logs imgproxy`; verify `IMGPROXY_URL=https://cdn.foodila.ir`
   and that `IMGPROXY_KEY/SALT` in `.env.production` match what the app signs with (same file, so they do).
@@ -202,5 +223,23 @@ dcp down                     # stop (keeps volumes/data)
   runtime also exports it. Locally, `pnpm dev` stays `development`.
 - **No Redis** in this stack (single instance, in-memory rate-limiting). Add it when scaling to
   multiple app instances — see `.claude/rules/redis.md`.
-- A stricter **Content-Security-Policy** can be added in `nginx/templates/default.conf.template` on the
-  app server block once you confirm the allowed origins (`cdn.` for images, `s3.` for upload `connect-src`).
+- A stricter **Content-Security-Policy** can be added to the app `server {}` block in
+  `nginx/host/foodila.ir.conf` once you confirm the allowed origins (`cdn.` for images, `s3.` for
+  upload `connect-src`).
+
+---
+
+## Alternative: bundled edge (no host nginx)
+
+If you deploy on a **fresh host with nothing on 80/443**, the stack can run its own Dockerized nginx +
+certbot instead of a host nginx. It's opt-in via the `bundled-edge` compose profile:
+
+```bash
+dcp up -d postgres minio
+bash nginx/init-letsencrypt.sh                       # issues the LE SAN cert (STAGING=1 to dry-run)
+dcp --profile bundled-edge up -d                     # starts everything incl. the Docker nginx (80/443)
+```
+
+In this mode the Docker nginx owns 80/443 and proxies `app`/`imgproxy`/`minio` over the compose network
+(the localhost `*_HOST_PORT` publishes are harmless/unused). Don't mix the two — pick host nginx **or**
+the bundled edge, not both.

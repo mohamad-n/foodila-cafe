@@ -26,6 +26,10 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     env_file: .env.production
+    # S3 API published on localhost only, for the HOST nginx to reach (s3.<domain> → here).
+    # The console (9001) stays unpublished. Override S3_HOST_PORT in .env.production if 9100 is taken.
+    ports:
+      - "127.0.0.1:${S3_HOST_PORT:-9100}:9000"
     volumes:
       - minio-data:/data
     healthcheck:
@@ -64,6 +68,9 @@ services:
       IMGPROXY_ALLOWED_SOURCES: "s3://"
       IMGPROXY_ENABLE_WEBP_DETECTION: "true"
       IMGPROXY_ENABLE_AVIF_DETECTION: "true"
+    # Published on localhost only, for the HOST nginx to reach (cdn.<domain> → here).
+    ports:
+      - "127.0.0.1:${IMGPROXY_HOST_PORT:-8100}:8080"
 
   # One-shot: apply pending Prisma migrations, then exit. The app waits for this to succeed.
   migrate:
@@ -85,8 +92,9 @@ services:
       target: runner
     restart: unless-stopped
     env_file: .env.production
-    expose:
-      - "3000"
+    # Published on localhost only, for the HOST nginx to reverse-proxy (foodila.ir → here).
+    ports:
+      - "127.0.0.1:${APP_HOST_PORT:-3100}:3000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -97,8 +105,13 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  # ── Bundled edge (OPT-IN) ──────────────────────────────────────────────────
+  # Only used on a host with NO existing web server. Start with `--profile bundled-edge`.
+  # The default deployment uses the HOST's nginx instead (see nginx/host/foodila.ir.conf + DEPLOY.md),
+  # so these two services stay OFF unless the profile is explicitly enabled.
   nginx:
     image: nginx:1.27-alpine
+    profiles: ["bundled-edge"]
     restart: unless-stopped
     depends_on:
       - app
@@ -122,6 +135,7 @@ services:
 
   certbot:
     image: certbot/certbot:latest
+    profiles: ["bundled-edge"]
     restart: unless-stopped
     volumes:
       - ./nginx/certbot/conf:/etc/letsencrypt
