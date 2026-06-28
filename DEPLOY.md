@@ -97,8 +97,13 @@ openssl rand -base64 32   # AUTH_SECRET, POSTGRES_PASSWORD, MINIO passwords
 openssl rand -hex 32      # IMGPROXY_KEY, IMGPROXY_SALT
 ```
 
-Make sure `DATABASE_URL`'s password matches `POSTGRES_PASSWORD`, and `MINIO_ACCESS_KEY/SECRET_KEY`
-match the MinIO root creds (or a scoped key you create).
+Make sure `DATABASE_URL`'s password matches `POSTGRES_PASSWORD`.
+
+> ⚠️ **MinIO creds must be identical pairs:** `MINIO_ACCESS_KEY` = `MINIO_ROOT_USER` **and**
+> `MINIO_SECRET_KEY` = `MINIO_ROOT_PASSWORD` (the exact same strings). `MINIO_ROOT_*` is what the MinIO
+> *server* boots with; `MINIO_*_KEY` is what the *app* and *imgproxy* sign with. If they differ you get
+> upload `403`s and "Source is unreachable" on images. After any change to these, recreate **all**
+> consumers: `dcp up -d --force-recreate minio app imgproxy`.
 
 > Tip: add an alias so you don't retype the compose flags:
 > ```bash
@@ -207,8 +212,15 @@ sudo systemctl reload nginx  # host nginx — after editing foodila.ir.conf
   `dcp ps`; confirm `proxy_pass` ports in `foodila.ir.conf` match `*_HOST_PORT`.
 - **Cert request fails** — DNS for all three names must resolve to this host *before* `certbot --nginx`;
   the host nginx must already serve them on `:80`. Add `--dry-run` to test without hitting LE rate limits.
-- **Uploads fail with 403 / SignatureDoesNotMatch** — the host nginx must pass `Host` **unchanged** to
-  MinIO (`proxy_set_header Host $host;`, already in `foodila.ir.conf`). Any Host/URI rewrite breaks SigV4.
+- **Uploads 403 AND/OR images "Source is unreachable"** — MinIO credential mismatch. `MINIO_SECRET_KEY`
+  must equal `MINIO_ROOT_PASSWORD` (and `MINIO_ACCESS_KEY` = `MINIO_ROOT_USER`); MinIO logs the giveaway
+  *"MINIO_ACCESS_KEY/SECRET_KEY are deprecated"*. Fix the pairs in `.env.production`, then recreate **every**
+  consumer (app + imgproxy both sign with these): `dcp up -d --force-recreate minio app imgproxy`. A common
+  trap: recreating only `minio app` leaves `imgproxy` on the old secret → uploads work but images don't.
+- **Uploads 403 / SignatureDoesNotMatch (creds are correct)** — then it's the host header: nginx must pass
+  `Host` **unchanged** to MinIO (`proxy_set_header Host $host;`, already in `foodila.ir.conf`). Any Host/URI
+  rewrite breaks SigV4. Also: the AWS SDK's default CRC32 checksum is disabled in `lib/storage.ts`
+  (`requestChecksumCalculation: "WHEN_REQUIRED"`) — required for MinIO presigned PUTs.
 - **Uploads fail with a CORS error** — the browser PUTs to `s3.foodila.ir`. MinIO emits its own CORS
   headers; if stripped, set an allowed origin on the bucket with `mc`:
   `dcp run --rm createbuckets sh -c "mc alias set local http://minio:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD && mc cors set local/\$MINIO_BUCKET <(echo '{...}')"`.
