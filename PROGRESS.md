@@ -880,9 +880,19 @@ public templates are responsive + `cn()`-composed while keeping their bespoke pe
   private network), `.dockerignore`. **`.gitignore` leak fix:** `.env.production` was **not** ignored
   before (only `.env`/`*.local`) → now all `.env.*` except the committed examples, plus `nginx/certbot/`
   (TLS private keys). **No Redis** (single instance, in-memory rate-limit) — add when scaling out.
-- **Verified locally:** image builds + boots + serves `/` `/login` `200`; `docker compose config` valid
-  (only nginx publishes ports); gates green. TLS issuance + subdomain routing are the on-server step
-  (need real DNS + 80/443) — documented, not runnable here.
+- **Plan B — reuse the host's existing nginx (chosen):** the Hetzner host already runs nginx (+ elitera/
+  metabase), so the **host nginx** is the TLS edge. The stack publishes app/imgproxy/MinIO on
+  `127.0.0.1:3100/8100/9100` (overridable `*_HOST_PORT`, picked clear of busy `3000/3008/9000/9050/5432/
+  5433`); the bundled Docker **nginx + certbot moved behind an opt-in `bundled-edge` profile** (off by
+  default). `nginx/host/foodila.ir.conf` is a drop-in host site (3 vhosts → the localhost ports; `s3.`
+  preserves `Host` for SigV4 + 30 MB uploads; app forwards `X-Forwarded-Proto` + WS; `cdn.` immutable),
+  TLS via host `certbot --nginx`. App env unchanged — inter-container traffic stays on the compose network.
+- **certbot-entrypoint fix** in `nginx/init-letsencrypt.sh` (bundled path): the image `ENTRYPOINT` is
+  `certbot`, so `sh -c "openssl…"`/`rm` ran as `certbot -c …` and failed → overridden with `--entrypoint sh`
+  (real-cert step uses `--entrypoint certbot` + args, not a single string).
+- **Verified locally:** image builds + boots + serves `/` `/login` `200`; `docker compose config` valid;
+  default `up` excludes nginx/certbot (profile gates them); host conf passes `nginx -t`; gates green. TLS
+  issuance + real-domain routing are the on-server step (need DNS) — documented, not runnable here.
 
 ## Migrations squashed to a single `0_init` baseline
 **Status:** ✅ done · **Skills:** prisma-data-model
@@ -933,3 +943,4 @@ _(one line per session: date · phase · outcome)_
 - 2026-06-28 · Deploy (production setup) · ✅ done — `output:standalone` + multi-stage Dockerfile, `docker-compose.prod.yml` (nginx-only public, one-shot `migrate`, certbot), nginx subdomain TLS vhosts for **foodila.ir** (app/cdn/s3), MinIO public/internal endpoint split, NODE_ENV, DEPLOY.md (Ubuntu 22/24 + host coexistence), `.gitignore` secret-leak fix; image builds + boots + compose validates; gates green.
 - 2026-06-28 · Maintenance (migration squash) · ✅ done — 4 dev migrations → single `0_init` baseline (faithful: empty-diff vs schema + clean apply to fresh DB); local `_prisma_migrations` re-baselined; don't squash again post-production.
 - 2026-06-28 · Feature (account change-password) · ✅ done — new `(account)` route group + self-service change-password (`requireUser`, current-password re-verify vs scrypt hash, audited) for super-admin + every café role (incl. STAFF); three-field verification form (RHF+zodResolver); linked from both admin headers; `/account` dynamic, no collision; gates green.
+- 2026-06-28 · Deploy (Plan B — host nginx) · ✅ done — host nginx becomes the TLS edge (server already runs nginx): stack publishes app/imgproxy/MinIO on `127.0.0.1:3100/8100/9100`, bundled nginx+certbot gated behind opt-in `bundled-edge` profile; added `nginx/host/foodila.ir.conf` (Host-preserving `s3.`, WS app, immutable `cdn.`) + `certbot --nginx` flow; fixed certbot-entrypoint bug in `init-letsencrypt.sh`; compose config + profiles + `nginx -t` validated; DEPLOY.md rewritten for Plan B.
