@@ -88,7 +88,10 @@ model Cafe {
   defaultLocale String       @default("fa")
   template      MenuTemplate @default(EDITORIAL) // which layout the café's menu renders
   themeTokens   Json         @default("{}") // per-café CSS-variable overrides (palette/type/radius)
-  logoKey       String? // MinIO object key for the logo (cafes/{id}/branding/…); null = no logo
+  logoKey         String? // MinIO object key for the logo (cafes/{id}/branding/…); null = no logo
+  faviconKey      String? // MinIO key for the per-café favicon (cafes/{id}/branding/…); null = app default
+  metaTitle       String? // public <title> + og:title override; null = café name
+  metaDescription String? // meta + og:description for the public menu
   showCalories  Boolean      @default(true) // show item calories on the public menu
   showPrice     Boolean      @default(true) // show item price on the public menu
   planId        String?

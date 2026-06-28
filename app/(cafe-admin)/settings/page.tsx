@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { imgUrl } from "@/lib/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogoUploader } from "./_components/LogoUploader";
+import { FaviconUploader } from "./_components/FaviconUploader";
+import { MetaSettingsForm } from "./_components/MetaSettingsForm";
 import { DisplaySettingsForm } from "./_components/DisplaySettingsForm";
 import { TemplateSettingsForm } from "./_components/TemplateSettingsForm";
 
@@ -14,9 +16,18 @@ export default async function SettingsPage() {
 
   const data = await db.cafe.findUnique({
     where: { id: cafe.id },
-    select: { logoKey: true, showCalories: true, showPrice: true, template: true },
+    select: {
+      logoKey: true,
+      faviconKey: true,
+      metaTitle: true,
+      metaDescription: true,
+      showCalories: true,
+      showPrice: true,
+      template: true,
+    },
   });
   const logoSrc = data?.logoKey ? imgUrl(data.logoKey, 240, 120, "fit") : null;
+  const faviconSrc = data?.faviconKey ? imgUrl(data.faviconKey, 64, 64, "fit") : null;
 
   return (
     <section className="max-w-2xl space-y-6">
@@ -43,6 +54,37 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <LogoUploader cafeId={cafe.id} logoSrc={logoSrc} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">متادیتا و سئو</CardTitle>
+          <CardDescription>
+            عنوان و توضیحات صفحهٔ منوی عمومی برای موتورهای جستجو و پیش‌نمایش لینک (OpenGraph). تصویر
+            پیش‌نمایش از لوگوی کافه ساخته می‌شود.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <MetaSettingsForm
+            cafeId={cafe.id}
+            defaults={{
+              metaTitle: data?.metaTitle ?? "",
+              metaDescription: data?.metaDescription ?? "",
+            }}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">فاوآیکون</CardTitle>
+          <CardDescription>
+            آیکونی که در تب مرورگر کنار آدرس منو دیده می‌شود. PNG مربعی توصیه می‌شود. اختیاری است.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FaviconUploader cafeId={cafe.id} faviconSrc={faviconSrc} />
         </CardContent>
       </Card>
 

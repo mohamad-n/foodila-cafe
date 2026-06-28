@@ -7,6 +7,18 @@ export const LogoInput = z.object({
   objectKey: z.string().min(1),
 });
 
+// Favicon shares the upload shape with the logo (a freshly-uploaded branding object).
+export const FaviconInput = LogoInput;
+
+// SEO / OpenGraph metadata for the public menu. Kept transform-free so `z.input === z.output`
+// (required for react-hook-form + zodResolver typing); the action normalises empty → null.
+export const MetaInput = z.object({
+  cafeId: z.string().min(1),
+  metaTitle: z.string().trim().max(120).optional(),
+  metaDescription: z.string().trim().max(300).optional(),
+});
+export type MetaInput = z.infer<typeof MetaInput>;
+
 export const DisplayInput = z.object({
   cafeId: z.string().min(1),
   showCalories: z.boolean(),

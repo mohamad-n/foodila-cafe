@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
@@ -24,6 +25,9 @@ const getCafe = (slug: string) =>
           template: true,
           themeTokens: true,
           logoKey: true,
+          faviconKey: true,
+          metaTitle: true,
+          metaDescription: true,
           showCalories: true,
           showPrice: true,
         },
@@ -90,6 +94,45 @@ export async function generateStaticParams() {
   } catch {
     return [];
   }
+}
+
+// Per-café SEO/OpenGraph + favicon. Reads the SAME cached café lookup as the page (deduped per
+// request), so a settings change that calls revalidateTag("cafe:"+slug) refreshes this too. The
+// og:image is built from the café logo (1200×630, no crop); favicon from the per-café upload.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ cafeSlug: string }>;
+}): Promise<Metadata> {
+  const { cafeSlug } = await params;
+  const cafe = await getCafe(cafeSlug);
+  if (!cafe) return {};
+
+  const title = cafe.metaTitle?.trim() || cafe.name;
+  const description = cafe.metaDescription?.trim() || undefined;
+  const ogImage = cafe.logoKey ? imgUrl(cafe.logoKey, 1200, 630, "fit") : undefined;
+  const favicon = cafe.faviconKey ? imgUrl(cafe.faviconKey, 64, 64, "fit") : undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      siteName: cafe.name,
+      type: "website",
+      locale: "fa_IR",
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630, alt: cafe.name }] : undefined,
+    },
+    twitter: {
+      card: ogImage ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    // Only override the app default favicon when the café uploaded one.
+    icons: favicon ? { icon: favicon } : undefined,
+  };
 }
 
 export default async function PublicMenuPage({
