@@ -16,11 +16,16 @@ const BASE_NAV: NavItem[] = [
   { href: "/menu", label: "منو" },
 ];
 const SETTINGS_NAV: NavItem = { href: "/settings", label: "تنظیمات" };
+// Account (self-service profile + password) — available to every role, including STAFF.
+const ACCOUNT_NAV: NavItem = { href: "/account", label: "حساب کاربری" };
 
 export default async function CafeAdminLayout({ children }: { children: React.ReactNode }) {
   const { user, cafe, impersonating } = await requireActiveCafe();
-  // Settings (branding + display) are OWNER/ADMIN only.
-  const NAV: NavItem[] = cafe.role === "STAFF" ? BASE_NAV : [...BASE_NAV, SETTINGS_NAV];
+  // Settings (branding + display) are OWNER/ADMIN only; account is for everyone.
+  const NAV: NavItem[] =
+    cafe.role === "STAFF"
+      ? [...BASE_NAV, ACCOUNT_NAV]
+      : [...BASE_NAV, SETTINGS_NAV, ACCOUNT_NAV];
 
   // Names for the café switcher (the user belongs to each — legitimate read).
   const ids = user.memberships.map((m) => m.cafeId);

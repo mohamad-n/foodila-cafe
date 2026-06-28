@@ -1,33 +1,37 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { logout } from "@/app/login/actions";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ThemeSwitcher } from "@/components/providers/ThemeSwitcher";
-import { AdminNav, type NavItem } from "@/components/admin/AdminNav";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 
-const NAV: NavItem[] = [
-  { href: "/cafes", label: "کافه‌ها" },
-  { href: "/users", label: "کاربران" },
-  { href: "/plans", label: "پلن‌ها" },
-  { href: "/account", label: "حساب کاربری" },
-];
-
-export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
+/**
+ * Self-service account area, reachable by ANY signed-in user (super-admin or any café role). It is
+ * its own route group so `/account` exists once (a page in both admin groups would collide on the
+ * same path). Themed like the admin surfaces (`admin-root` + next-themes), not the public menu.
+ */
+export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
-  if (session.user.platformRole !== "SUPER_ADMIN") redirect("/dashboard");
+
+  // "Back" returns to the relevant home for the user's tier.
+  const home = session.user.platformRole === "SUPER_ADMIN" ? "/cafes" : "/dashboard";
 
   return (
     <ThemeProvider>
       <div className="admin-root min-h-screen bg-background text-foreground">
         <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur sm:px-6">
-          <div className="flex items-center gap-3">
-            <AdminNav items={NAV} title="پلتفرم" />
-            <span className="font-semibold">پلتفرم</span>
-            <Badge className="hidden sm:inline-flex">SUPER ADMIN</Badge>
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link href={home}>
+                <ArrowRight className="size-4" />
+                بازگشت
+              </Link>
+            </Button>
+            <span className="font-semibold">حساب کاربری</span>
           </div>
 
           <div className="flex items-center gap-2">
