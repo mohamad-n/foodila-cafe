@@ -11,7 +11,6 @@ import type { MenuItem, MenuTemplateProps } from "../types";
 export default function Scandi({ cafe, categories }: MenuTemplateProps) {
   const [cat, setCat] = useState(0);
   const [active, setActive] = useState<MenuItem | null>(null);
-  const current = categories[cat];
 
   return (
     <div className="scandi">
@@ -37,34 +36,41 @@ export default function Scandi({ cafe, categories }: MenuTemplateProps) {
         </div>
       </header>
 
-      <main className="s-grid">
-        {current?.items.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={cn("s-card", !item.isAvailable && "na")}
-            onClick={() => setActive(item)}
-          >
-            <div className="s-card-img">
-              {item.images[0] ? (
-                <MenuPhoto image={item.images[0]} alt={item.name.fa} sizes="(max-width:520px) 50vw, 260px" />
-              ) : (
-                <div className="ph" />
-              )}
-            </div>
-            <h3>{item.name.fa}</h3>
-            {typeof item.price === "number" ? (
-              <span className="s-price">{faToman(item.price)}</span>
-            ) : null}
-            {typeof item.calories === "number" ? (
-              <span className="s-cal">{faNum(item.calories)} کالری</span>
-            ) : null}
-            {!item.isAvailable ? <span className="s-na">ناموجود</span> : null}
-          </button>
+      {/* Every category stays mounted (hidden when inactive) so images load once, no re-flash on switch. */}
+      <main className="s-main">
+        {categories.map((c, ci) => (
+          <div key={c.id} className="s-grid" hidden={ci !== cat}>
+            {c.items.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={cn("s-card", !item.isAvailable && "na")}
+                onClick={() => setActive(item)}
+              >
+                <div className="s-card-img">
+                  {item.images[0] ? (
+                    <MenuPhoto
+                      image={item.images[0]}
+                      alt={item.name.fa}
+                      sizes="(max-width:520px) 50vw, 260px"
+                    />
+                  ) : (
+                    <div className="ph" />
+                  )}
+                </div>
+                <h3>{item.name.fa}</h3>
+                {typeof item.price === "number" ? (
+                  <span className="s-price">{faToman(item.price)}</span>
+                ) : null}
+                {typeof item.calories === "number" ? (
+                  <span className="s-cal">{faNum(item.calories)} کالری</span>
+                ) : null}
+                {!item.isAvailable ? <span className="s-na">ناموجود</span> : null}
+              </button>
+            ))}
+            {c.items.length === 0 ? <p className="empty">موردی برای نمایش نیست.</p> : null}
+          </div>
         ))}
-        {!current || current.items.length === 0 ? (
-          <p className="empty">موردی برای نمایش نیست.</p>
-        ) : null}
       </main>
 
       {active ? <DetailSheet item={active} onClose={() => setActive(null)} /> : null}

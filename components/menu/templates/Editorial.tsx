@@ -16,7 +16,6 @@ export default function Editorial({ cafe, categories }: MenuTemplateProps) {
   const feedRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const takeRef = useRef<HTMLDivElement>(null);
-  const current = categories[cat];
 
   useEffect(() => {
     feedRef.current?.scrollTo({ top: 0 });
@@ -65,63 +64,61 @@ export default function Editorial({ cafe, categories }: MenuTemplateProps) {
         </div>
       </div>
 
+      {/* Every category stays mounted (hidden when inactive) so photos load once and never re-flash
+          when you switch chips and come back. */}
       <div className="feed" ref={feedRef}>
-        {current?.items.map((item, i) => (
-          <section className="slideItem" key={item.id} onClick={() => openItem(item)}>
-            <div
-              className="bgimg"
-              style={
-                item.images[0]
-                  ? { backgroundImage: `url("${item.images[0].blurDataURL}")` }
-                  : undefined
-              }
-            >
-              {item.images[0] ? (
-                <MenuPhoto image={item.images[0]} alt={item.name.fa} sizes="100vw" />
-              ) : (
-                <div className="ph" />
-              )}
-            </div>
-            <div className="scrim" />
-            <div className="num">{faNum(String(i + 1).padStart(2, "0"))}</div>
-            <div className="meta">
-              <div className="cat-eyebrow">{current.name.fa}</div>
-              <h2>{item.name.fa}</h2>
-              {item.ingredients.length > 0 ? (
-                <p className="ing">{item.ingredients.join(" · ")}</p>
-              ) : null}
-              <div className="rowmeta">
-                {typeof item.price === "number" ? (
-                  <span className="pill pill-price">{faToman(item.price)}</span>
+        {categories.map((c, ci) => (
+          <div key={c.id} className="ed-cat" hidden={ci !== cat}>
+            {c.items.map((item, i) => (
+              <section className="slideItem" key={item.id} onClick={() => openItem(item)}>
+                <div className="bgimg">
+                  {item.images[0] ? (
+                    <MenuPhoto image={item.images[0]} alt={item.name.fa} sizes="100vw" />
+                  ) : (
+                    <div className="ph" />
+                  )}
+                </div>
+                <div className="scrim" />
+                <div className="num">{faNum(String(i + 1).padStart(2, "0"))}</div>
+                <div className="meta">
+                  <div className="cat-eyebrow">{c.name.fa}</div>
+                  <h2>{item.name.fa}</h2>
+                  {item.ingredients.length > 0 ? (
+                    <p className="ing">{item.ingredients.join(" · ")}</p>
+                  ) : null}
+                  <div className="rowmeta">
+                    {typeof item.price === "number" ? (
+                      <span className="pill pill-price">{faToman(item.price)}</span>
+                    ) : null}
+                    {typeof item.calories === "number" ? (
+                      <span className="pill">
+                        <span className="g">●</span> {faNum(item.calories)} کالری
+                      </span>
+                    ) : null}
+                    {!item.isAvailable ? <span className="pill">ناموجود</span> : null}
+                  </div>
+                  <button
+                    type="button"
+                    className="cta"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openItem(item);
+                    }}
+                  >
+                    مشاهدهٔ جزئیات ←
+                  </button>
+                </div>
+                <div className="hairline" />
+                {i === 0 ? (
+                  <div className="scrollhint">برای دیدن موارد بعدی بکشید ↑</div>
                 ) : null}
-                {typeof item.calories === "number" ? (
-                  <span className="pill">
-                    <span className="g">●</span> {faNum(item.calories)} کالری
-                  </span>
-                ) : null}
-                {item.images.length > 0 ? (
-                  <span className="pill">{faNum(item.images.length)} تصویر</span>
-                ) : null}
-                {!item.isAvailable ? <span className="pill">ناموجود</span> : null}
-              </div>
-              <button
-                type="button"
-                className="cta"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openItem(item);
-                }}
-              >
-                مشاهدهٔ جزئیات ←
-              </button>
-            </div>
-            <div className="hairline" />
-            {i === 0 ? <div className="scrollhint">برای دیدن موارد بعدی بکشید ↑</div> : null}
-          </section>
+              </section>
+            ))}
+            {c.items.length === 0 ? (
+              <div className="empty">موردی برای نمایش نیست.</div>
+            ) : null}
+          </div>
         ))}
-        {!current || current.items.length === 0 ? (
-          <div className="empty">موردی برای نمایش نیست.</div>
-        ) : null}
       </div>
 
       {active ? (

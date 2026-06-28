@@ -54,31 +54,34 @@ const getMenu = (cafeId: string, showCalories: boolean, showPrice: boolean) =>
         },
       });
 
+      // Hide empty categories: a category with no items shouldn't get a header tab/chip or a section.
       return Promise.all(
-        cats.map(async (c) => ({
-          id: c.id,
-          name: c.name as Localized,
-          items: await Promise.all(
-            c.items.map(async (it) => ({
-              id: it.id,
-              name: it.name as Localized,
-              description: (it.description as Localized | null) ?? undefined,
-              ingredients: (it.ingredients as string[] | null) ?? [],
-              calories: showCalories ? (it.calories ?? undefined) : undefined,
-              price: showPrice ? (it.price ?? undefined) : undefined,
-              isAvailable: it.isAvailable,
-              images: await Promise.all(
-                it.images.map(async (img) => ({
-                  src: imgUrl(img.objectKey, 1000),
-                  srcSet: imgSrcSet(img.objectKey, SRCSET_WIDTHS),
-                  blurDataURL: await blurhashToDataURL(img.blurhash),
-                  width: img.width,
-                  height: img.height,
-                })),
-              ),
-            })),
-          ),
-        })),
+        cats
+          .filter((c) => c.items.length > 0)
+          .map(async (c) => ({
+            id: c.id,
+            name: c.name as Localized,
+            items: await Promise.all(
+              c.items.map(async (it) => ({
+                id: it.id,
+                name: it.name as Localized,
+                description: (it.description as Localized | null) ?? undefined,
+                ingredients: (it.ingredients as string[] | null) ?? [],
+                calories: showCalories ? (it.calories ?? undefined) : undefined,
+                price: showPrice ? (it.price ?? undefined) : undefined,
+                isAvailable: it.isAvailable,
+                images: await Promise.all(
+                  it.images.map(async (img) => ({
+                    src: imgUrl(img.objectKey, 1000),
+                    srcSet: imgSrcSet(img.objectKey, SRCSET_WIDTHS),
+                    blurDataURL: await blurhashToDataURL(img.blurhash),
+                    width: img.width,
+                    height: img.height,
+                  })),
+                ),
+              })),
+            ),
+          })),
       );
     },
     ["public-menu", cafeId, String(showCalories), String(showPrice)],

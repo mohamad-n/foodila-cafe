@@ -26,16 +26,12 @@ export function ItemDetailContent({ item }: { item: MenuItem }) {
         ) : null}
       </div>
 
-      {typeof item.calories === "number" || item.images.length > 1 || !item.isAvailable ? (
+      {typeof item.calories === "number" || !item.isAvailable ? (
         <div className="badges">
           {typeof item.calories === "number" ? (
             <span className="badge">
               <span className="g">●</span> {faNum(item.calories)} کالری
             </span>
-          ) : null}
-          {/* image-count tag only when there's more than one image */}
-          {item.images.length > 1 ? (
-            <span className="badge">{faNum(item.images.length)} تصویر</span>
           ) : null}
           {!item.isAvailable ? <span className="badge">ناموجود</span> : null}
         </div>

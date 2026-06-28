@@ -19,7 +19,26 @@
   --panel: #171311; --line: rgba(243, 236, 223, 0.14); --radius: 18px;
 }
 
+/* Warm + Scandi follow the OS color scheme: their blocks above are the LIGHT palette; these are the
+   DARK overrides (darker --bg, light --ink). Editorial is intentionally always dark, so it's omitted.
+   Per-café `themeTokens` (inline vars from ThemeScope) still win over both. */
+@media (prefers-color-scheme: dark) {
+  .menu-root[data-template="warm"] {
+    --bg: #1a120c; --ink: #f1e7d8; --soft: #b3a48f; --accent: #d28a3c;
+    --accent-2: #93a06a; --panel: #241a12; --line: rgba(241, 231, 216, 0.12);
+    color-scheme: dark;
+  }
+  .menu-root[data-template="scandi"] {
+    --bg: #16171b; --ink: #ececea; --soft: #9b988f; --accent: #93a589;
+    --panel: #1e2024; --line: rgba(255, 255, 255, 0.1);
+    color-scheme: dark;
+  }
+}
+
 .menu-root { background: var(--bg); color: var(--ink); min-height: 100vh; }
+/* Inactive categories are kept mounted with the `hidden` attr (images load once, no re-flash on
+   re-select). Force the hide to win over the templates' `display: grid/flex` on the same elements. */
+.menu-root [hidden] { display: none !important; }
 .menu-root * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 .menu-root button { font-family: inherit; cursor: pointer; }
 /* Visible keyboard focus for the bespoke menu controls (mouse/touch unaffected). */
@@ -31,7 +50,7 @@
 
 /* ---- café logo: visual-left of the header (inline-end under RTL); name stays at the start ---- */
 .menu-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.menu-logo { height: 30px; width: auto; max-width: 120px; object-fit: contain; display: block; }
+.menu-logo { height: 50px; width: auto; max-width: 150px; object-fit: contain; display: block; }
 [data-template="editorial"] .brand { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
 /* ---- price accents (per template + detail) ---- */
@@ -41,7 +60,7 @@
 .detail .badge-price { background: none; border-color: transparent; padding: 0; color: var(--accent); font-weight: 700; font-size: 17px; }
 
 /* ---- shared photo (blurhash LQIP behind the real image) ---- */
-.menu-root .photo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.menu-root .photo { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; }
 .menu-root .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* ---- shared carousel + fullscreen primitives ---- */
@@ -93,7 +112,7 @@
 
 /* ===================== EDITORIAL ===================== */
 [data-template="editorial"] .top { position: fixed; top: 0; inset-inline: 0; z-index: 40; max-width: 520px; margin: 0 auto; padding: 16px 16px 26px; background: linear-gradient(to bottom, rgba(14, 12, 11, 0.92), rgba(14, 12, 11, 0)); }
-[data-template="editorial"] .brand { padding: 0 4px 12px; }
+[data-template="editorial"] .brand { padding: 0 4px 0; }
 [data-template="editorial"] .brand .n { font-size: 19px; font-weight: 700; letter-spacing: 0.04em; }
 [data-template="editorial"] .chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
 [data-template="editorial"] .chips::-webkit-scrollbar { display: none; }
@@ -102,11 +121,13 @@
 [data-template="editorial"] .feed { height: 100vh; max-width: 520px; margin: 0 auto; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; }
 [data-template="editorial"] .feed::-webkit-scrollbar { display: none; }
 [data-template="editorial"] .slideItem { height: 100vh; scroll-snap-align: start; position: relative; display: flex; align-items: flex-end; overflow: hidden; }
-/* Image is centered with side margins (not full-bleed) and rounded; scrim matches its bounds. */
-[data-template="editorial"] .bgimg { position: absolute; inset-block: 14px; inset-inline: 16px; border-radius: 22px; overflow: hidden; background-size: cover; background-position: center; }
+/* Image is centered with side margins (not full-bleed) and rounded; scrim matches its bounds.
+   The card is a SOLID --panel fill (matching the page surface) — no blurhash backdrop, so there's
+   never a tiled/patterned background while the photo loads; the letterbox around the 4:5 crop is solid. */
+[data-template="editorial"] .bgimg { position: absolute; inset-block: 14px; inset-inline: 16px; border-radius: 22px; overflow: hidden; background: var(--panel); }
 /* Sharp photo = portrait 4:5 cover crop, centered vertically (a vertical crop — not full square,
-   not the over-cropped full-bleed). The blurhash backdrop (set on .bgimg) fills the rest. Tune the
-   amount of vertical crop with the aspect-ratio below (taller ratio = more side crop). */
+   not the over-cropped full-bleed). The solid --panel fill shows in the letterbox. Tune the amount
+   of vertical crop with the aspect-ratio below (taller ratio = more side crop). */
 [data-template="editorial"] .bgimg .photo { position: absolute; inset: 0; margin: auto; width: 100%; height: auto; aspect-ratio: 4 / 5; background: none; }
 [data-template="editorial"] .bgimg .photo img { object-fit: cover; }
 [data-template="editorial"] .scrim { position: absolute; inset-block: 14px; inset-inline: 16px; border-radius: 22px; background: linear-gradient(to top, rgba(8, 6, 5, 0.92) 6%, rgba(8, 6, 5, 0.35) 40%, rgba(8, 6, 5, 0.15) 70%, rgba(8, 6, 5, 0.45) 100%); }
@@ -129,7 +150,7 @@
 /* ===================== WARM ===================== */
 [data-template="warm"] { font-weight: 400; }
 [data-template="warm"] .w-top { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 16px 16px 12px; max-width: 520px; margin: 0 auto; }
-[data-template="warm"] .menu-head { margin-bottom: 12px; }
+[data-template="warm"] .menu-head { margin-bottom: 0; }
 [data-template="warm"] .w-brand { font-size: 20px; font-weight: 700; }
 [data-template="warm"] .w-pills { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
 [data-template="warm"] .w-pills::-webkit-scrollbar { display: none; }
@@ -146,7 +167,7 @@
 
 /* ===================== SCANDI ===================== */
 [data-template="scandi"] .s-top { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); padding: 18px 18px 0; max-width: 720px; margin: 0 auto; }
-[data-template="scandi"] .menu-head { margin-bottom: 14px; }
+[data-template="scandi"] .menu-head { margin-bottom: 0; }
 [data-template="scandi"] .s-brand { font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
 [data-template="scandi"] .s-tabs { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; }
 [data-template="scandi"] .s-tabs::-webkit-scrollbar { display: none; }
